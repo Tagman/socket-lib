@@ -1,0 +1,28 @@
+language: cpp
+
+sudo: required
+
+
+before_install:
+  - pip install --user cpp-coveralls
+#  - apt install lcov
+
+install:
+#  - gcov --version
+#  - g++ --version
+  - mkdir -p build/unit
+  - cd build/unit
+  - cmake -DCMAKE_BUILD_TYPE=UnitTest -DCOVERAGE=ON ../src
+
+script:
+- |
+  make socket && \
+  make unit_TCP && \
+  cd socket-lib && \
+  ./unit_TCP --gtest_output="xml" && \
+  cat test_detail.xml && \
+  cd ../../..
+
+after_success:
+  - pwd
+  - coveralls --verbose --root .
