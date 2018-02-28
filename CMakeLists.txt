@@ -15,7 +15,7 @@ set(SOCKET_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src )
 
 
 ## Combining translation units
-set(socket_impl ${SOCKET_SOURCE_DIR}/TCPSocket.cpp)
+set(socket_impl ${SOCKET_SOURCE_DIR}/TCPSocket.cpp src/Commander.cpp src/Commander.h)
 set(socket_header ${SOCKET_INCLUDE_DIR}/socket/TCPSocket.h)
 
 add_library(socket
