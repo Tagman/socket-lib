@@ -2,7 +2,7 @@
 // Created by chris on 2/28/18.
 //
 
-#include "Commander.h"
+#include "socket/Commander.h"
 #include <iostream>
 
 
@@ -13,7 +13,7 @@ Commander::Commander() {
     m_currentStrategy = new Strategy();
 }
 
-void Commander::start() {
+bool Commander::start() {
 
     int othersNumber = m_udpSocket->listenToNumber();
     std::cout << "others: " << othersNumber << std::endl;
@@ -22,11 +22,16 @@ void Commander::start() {
     std::cout << "paired: " << shouldPair << std::endl;
 
     bool sendSuccesfull = false;
-    if(shouldPair)
+    if(shouldPair) {
+        m_tcpSocket->setIp( std::to_string( othersNumber ));
+        m_tcpSocket->setMessage( std::to_string( othersNumber * othersNumber ));
         sendSuccesfull = m_tcpSocket->sendMessage();
 
+    }
 
     std::cout << "sent: " << sendSuccesfull << std::endl;
+
+    return  shouldPair && sendSuccesfull;
 }
 
 void Commander::setTcpSocket(TCPSocket *tcpSocket) {

@@ -22,7 +22,7 @@ set(socket_impl
         ${SOCKET_SOURCE_DIR}/Commander.cpp
         ${SOCKET_SOURCE_DIR}/Strategy.cpp
         )
-set(socket_header ${SOCKET_INCLUDE_DIR}/socket/TCPSocket.h)
+#set(socket_header ${SOCKET_INCLUDE_DIR}/socket/TCPSocket.h)
 
 add_library(socket
         ${socket_impl}
@@ -51,6 +51,7 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
 
         set(unit_src 
                 ${project_test_dir}/unit_TCP_sendMessage.cpp
+                ${project_test_dir}/module_socketlib_skeleton.cpp
                 )
 
         ## Target Creation

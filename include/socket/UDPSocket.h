@@ -9,6 +9,10 @@
 class UDPSocket {
 
 public:
+    UDPSocket(int heighestNumber);
+
+    UDPSocket();
+
     int listenToNumber();
 
 private:

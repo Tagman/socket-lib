@@ -3,11 +3,15 @@
 //
 
 #include <iostream>
-#include "UDPSocket.h"
+#include "socket/UDPSocket.h"
+
+UDPSocket::UDPSocket() {
+    heighestNumber = 0;
+}
 
 int UDPSocket::listenToNumber() {
     //szenario: Ever increasing blockheights incoming
-    std::cout << "recieved number: " << heighestNumber;
+    std::cout << "recieved number: " << heighestNumber << std::endl;
 
 
     return heighestNumber++; // increment for next call

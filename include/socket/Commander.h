@@ -6,7 +6,7 @@
 #define SOCKET_LIB_COMMANDER_H
 
 
-#include <socket/TCPSocket.h>
+#include "TCPSocket.h"
 #include "UDPSocket.h"
 #include "Strategy.h"
 
@@ -21,7 +21,7 @@ public:
 
     Commander();
 
-    void start();
+    bool start();
 
     bool setStrategy(Strategy* newStrategy);
 
