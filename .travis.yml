@@ -20,8 +20,8 @@ script:
   make unit_TCP && \
   ./unit_TCP --gtest_output="xml" && \
   cat test_detail.xml && \
-  cd ../../..
+  cd ../..
 
 after_success:
   - pwd
-  - coveralls --verbose --root .
+  - coveralls --verbose --root . -e external
