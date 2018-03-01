@@ -2,6 +2,12 @@ language: cpp
 
 #sudo: required
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - lcov
 
 before_install:
   - pip install --user cpp-coveralls
@@ -12,7 +18,7 @@ install:
 #  - g++ --version
   - mkdir -p build/unit
   - cd build/unit
-  - cmake -DCMAKE_BUILD_TYPE=UnitTest -DCOVERAGE=ON ../..
+  - cmake -DCMAKE_BUILD_TYPE=UnitTest -DCOVERAGE=ON -DCOV_OUTPUT=ON ../..
 
 script:
 - |
