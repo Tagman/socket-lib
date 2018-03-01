@@ -4,6 +4,10 @@
 
 build/**
 
+external/gtest/**
+!external/gtest/CMakeLists.txt
+!external/gtest/install.sh
+
 # User-specific stuff:
 .idea/**/workspace.xml
 .idea/**/tasks.xml

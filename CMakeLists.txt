@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 ## access to external libs
 
-set( external_dir ${PROJECT_SOURCE_DIR}/../external )
+set( external_dir ${PROJECT_SOURCE_DIR}/external )
 
 ## set directory variables
 set(SOCKET_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/)
