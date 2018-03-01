@@ -84,7 +84,7 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
                 APPEND_COVERAGE_COMPILER_FLAGS()
 
                 if(COV_OUTPUT)
-                        set(COVERAGE_EXCLUDES '${ext_dir}/*'  )
+                        set(COVERAGE_EXCLUDES '${ext_dir}/*' '/usr/*'  )
 
                         # add way to run all unittests with one target
                         SETUP_TARGET_FOR_COVERAGE(
