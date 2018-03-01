@@ -20,8 +20,10 @@ script:
   make unit_TCP && \
   ./unit_TCP --gtest_output="xml" && \
   cat test_detail.xml && \
+  make coverage_runner && \
   cd ../..
 
 after_success:
   - pwd
   - coveralls --verbose --root . -e external
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
