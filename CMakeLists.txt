@@ -21,6 +21,7 @@ set(socket_impl
         ${SOCKET_SOURCE_DIR}/UDPSocket.cpp
         ${SOCKET_SOURCE_DIR}/Commander.cpp
         ${SOCKET_SOURCE_DIR}/Strategy.cpp
+        ${SOCKET_SOURCE_DIR}/MockStrategy.cpp
         )
 #set(socket_header ${SOCKET_INCLUDE_DIR}/socket/TCPSocket.h)
 
