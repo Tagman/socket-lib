@@ -1,8 +1,10 @@
+dist: trusty
+sudo: false
 language: cpp
-
 compiler:
   - gcc
   - clang
+
 
 #sudo: required
 
@@ -10,8 +12,10 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-5.0
     packages:
       - lcov
+      - clang-5.0
 
 before_install:
   - pip install --user cpp-coveralls
