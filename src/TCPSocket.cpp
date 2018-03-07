@@ -39,4 +39,7 @@ bool TCPSocket::setIp(std::string ip) {
     return false;
 }
 
+int TCPSocket::clangTest(int x){
+    return 5/(x-x);
+}
 
