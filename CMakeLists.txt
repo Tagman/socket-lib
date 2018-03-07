@@ -11,7 +11,7 @@ set( external_dir ${PROJECT_SOURCE_DIR}/external )
 ## set directory variables
 set(SOCKET_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/)
 set(SOCKET_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src )
-set(socket_script_dir ${PROJECT_SOURCE_DIR}/scripts )
+set(SOCKET_SCRIPT_DIR ${PROJECT_SOURCE_DIR}/scripts )
 
 
 
@@ -45,7 +45,7 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
                                 ${external_dir}/gtest/internal-build/ 
                         )
 
-            find_package(Threads REQUIRED)
+        find_package(Threads REQUIRED)
 
         link_directories( ${GTEST_LIBS_DIR} )
         set ( project_test_dir ${PROJECT_SOURCE_DIR}/test/)
@@ -80,7 +80,7 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
 
 
         if(COVERAGE)
-                include( ${socket_script_dir}/CodeCoverage.cmake )
+                include( ${SOCKET_SCRIPT_DIR}/CodeCoverage.cmake )
 
                 APPEND_COVERAGE_COMPILER_FLAGS()
 
@@ -89,8 +89,8 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
 
                         # add way to run all unittests with one target
                         SETUP_TARGET_FOR_COVERAGE(
-                                NAME coverage_runner
-                                EXECUTABLE unit_TCP -j ${PROCESSOR_COUNT}
+                                NAME result_coverage
+                                EXECUTABLE unit_TCP --gtest_output="xml:result_unit.xml" -j ${PROCESSOR_COUNT}
                                 DEPENDENCIES unit_TCP
                         )
                         
@@ -98,4 +98,13 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
         endif(COVERAGE)
 
 endif ()
+
+### Deployment ### 
+
+MESSAGE( STATUS "socket-bin: ${PROJECT_BINARY_DIR}")
+
+add_custom_target(deploy ${BASH} -c "${SOCKET_SCRIPT_DIR}/deploy.sh -s ${PROJECT_BINARY_DIR} -d ${PROJECT_SOURCE_DIR}/artifacts/"
+                DEPENDS socket
+                WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                )
 
