@@ -24,10 +24,5 @@ TEST(TCP, unit_sendMessage) {
 
     ASSERT_TRUE(sendMessageReturn);
 
-    TCPSocket failSocket;
-
-    failSocket.clangTest(100);
-
-
 
 }
