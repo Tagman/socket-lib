@@ -1,5 +1,9 @@
 language: cpp
 
+compiler:
+  - gcc
+  - clang
+
 #sudo: required
 
 addons:
