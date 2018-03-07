@@ -20,6 +20,8 @@ before_install:
 install:
 #  - gcov --version
 #  - g++ --version
+  - scan-build-5.0 -h
+  - scan-build -h
   - mkdir -p build/unit
   - cd build/unit
   - cmake -DCMAKE_BUILD_TYPE=UnitTest -DCOVERAGE=ON -DCOV_OUTPUT=ON ../..
