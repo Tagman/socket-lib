@@ -55,7 +55,9 @@ then
     mv * ..
     cd -
     rmdir ${OUTPUT}
-    make deploy
+    
 fi
+
+make deploy
 
 
