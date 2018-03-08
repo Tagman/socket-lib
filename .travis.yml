@@ -52,3 +52,4 @@ deploy:
   on:
     branch: master
   local-dir: artifacts/results
+  verbose: true
