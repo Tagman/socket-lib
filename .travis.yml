@@ -1,12 +1,6 @@
 dist: trusty
 sudo: required
 language: cpp
-compiler:
-  - gcc
-  - clang
-
-
-#sudo: required
 
 addons:
   apt:
@@ -17,27 +11,28 @@ addons:
       - lcov
       - clang-5.0
 
+compiler:
+  - gcc
+  - clang
+
+matrix:
+  include:
+  - compiler: gcc
+    env: COVERAGE="-c"
+  - compiler: gcc
+    env: SCAN="-s"
+
 before_install:
   - pip install --user cpp-coveralls
   - sudo apt install clang-5.0
 
 install:
-#  - gcov --version
-#  - g++ --version
-  - ls -al /usr/local/clang-5.0.0/*/*
-  - scan-build -h
   - mkdir -p build/unit
   - cd build/unit
-  - cmake -DCMAKE_BUILD_TYPE=UnitTest -DCOVERAGE=ON -DCOV_OUTPUT=ON ../..
 
 script:
-- |
-  make socket && \
-  make unit_TCP && \
-  ./unit_TCP --gtest_output="xml" && \
-  cat test_detail.xml && \
-  make coverage_runner && \
-  cd ../..
+  - ../../scripts/build.sh $COVERAGE $SCAN 
+  - cd ../..
 
 after_success:
   - pwd
