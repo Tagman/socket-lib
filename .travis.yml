@@ -23,6 +23,8 @@ matrix:
     env: COVERAGE="-c"
   - compiler: gcc
     env: SCAN="-s"
+  - compiler: gcc
+    env: COVERAGE="-c" SCAN="-s"
 
 before_install:
   - pip install --user cpp-coveralls
@@ -44,6 +46,7 @@ after_success:
     bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
   fi
 
+
 deploy:
   provider: pages
   skip-cleanup: true
@@ -51,5 +54,5 @@ deploy:
   keep-history: true
   on:
     branch: master
-  local-dir: artifacts/results
+  local-dir: artifacts/results/*
   verbose: true
