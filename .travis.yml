@@ -54,5 +54,5 @@ deploy:
   keep-history: true
   on:
     branch: master
-  local-dir: artifacts/results/*
+  local-dir: artifacts/results/result_coverage/
   verbose: true
