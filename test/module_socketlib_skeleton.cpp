@@ -22,7 +22,7 @@ TEST_F(CommanderTest, workflow) {
     for(int i = 0; i < 5; ++i )
         ASSERT_TRUE( commander.start() );
 
-    ASSERT_TRUE( false );
+    //ASSERT_TRUE( false );
 }
 
 TEST_F(CommanderTest, newAndDelete){
