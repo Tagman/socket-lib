@@ -11,6 +11,8 @@ addons:
       - lcov
       - clang-5.0
 
+
+
 compiler:
   - gcc
   - clang
@@ -40,3 +42,12 @@ after_success:
     coveralls --verbose --root . -e external
     bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
   fi
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  on:
+    branch: master
+  local-dir: $TRAVIS_BUILD_DIR/artifacts/results/result_coverage
