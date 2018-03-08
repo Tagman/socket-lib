@@ -5,9 +5,9 @@ then
     echo "Usage: -s path/to/search/start/ -d /path/to/deploy/"
 else
     PWD=$(pwd)
-    EXECUTE_DIR=$(dirname $0)
-    echo "Dirname: ${PWD}"
-    echo "PWD: ${SCRIPT_DIR}"
+    SCRIPT_DIR=$(dirname $0)
+    echo "Script_dir: ${SCRIPT_DIR}"
+    echo "PWD: ${PWD}"
     SEARCH=""
     DEPLOY=""
 
