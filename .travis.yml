@@ -35,6 +35,7 @@ install:
 script:
   - ../../scripts/build.sh $COVERAGE $SCAN 
   - cd ../..
+  - ls -al $TRAVIS_BUILD_DIR/artifacts/*/*
 
 after_success:
 - |
