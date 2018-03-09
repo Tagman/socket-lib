@@ -10,5 +10,7 @@ else
     git add ${ARTIFACT_DIR}/results/
     git commit -m $1
 
+    cd ${SCRIPT_DIR}/..
+
     git subtree push --prefix=${ARTIFACT_DIR}/results origin gh-pages
 fi
