@@ -4,6 +4,7 @@
 
 build/**
 artifacts/**
+backup/**
 
 external/gtest/**
 !external/gtest/CMakeLists.txt
