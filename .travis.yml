@@ -51,7 +51,9 @@ after_success:
   fi
 
 
-#deploy:
+deploy:
+  - git checkout stage_page
+  - ../../scripts/deploy.sh Test
  # provider: pages
   #skip-cleanup: true
   #github-token: $GITHUB_TOKEN
