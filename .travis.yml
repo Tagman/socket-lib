@@ -49,6 +49,7 @@ after_success:
     coveralls --verbose --root . -e external
     bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
   fi
+  git fetch
   git checkout stage_page
   ../../scripts/deploy.sh Test
 
