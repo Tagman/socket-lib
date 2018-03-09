@@ -47,7 +47,7 @@ else
     ./unit_TCP --gtest_output="xml:result_unit.xml"
 fi
 
-## Deploy scan results better
+## stage scan results better
 if [ -n "$SCAN" ]
 then
     cd result_scan/*
@@ -58,6 +58,6 @@ then
     
 fi
 
-make deploy
+make stage
 
 

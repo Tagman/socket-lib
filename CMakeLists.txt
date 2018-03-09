@@ -103,7 +103,7 @@ endif ()
 
 MESSAGE( STATUS "socket-bin: ${PROJECT_BINARY_DIR}")
 
-add_custom_target(deploy ${BASH} -c "${SOCKET_SCRIPT_DIR}/deploy.sh -s ${PROJECT_BINARY_DIR} -d ${PROJECT_SOURCE_DIR}/artifacts/"
+add_custom_target(stage ${BASH} -c "${SOCKET_SCRIPT_DIR}/stage.sh -s ${PROJECT_BINARY_DIR} -d ${PROJECT_SOURCE_DIR}/artifacts/"
                 DEPENDS socket
                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                 )
