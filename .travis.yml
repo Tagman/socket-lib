@@ -11,6 +11,10 @@ addons:
       - lcov
       - clang-5.0
 
+branches:
+  only:
+    - master
+
 
 
 compiler:
