@@ -51,12 +51,12 @@ after_success:
   fi
 
 
-deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
-  keep-history: true
-  on:
-    branch: master
-  local-dir: artifacts/results/result_coverage/
-  verbose: true
+#deploy:
+ # provider: pages
+  #skip-cleanup: true
+  #github-token: $GITHUB_TOKEN
+ # keep-history: true
+ # on:
+ #   branch: master
+ ## local-dir: artifacts/results/result_coverage/
+ # verbose: true
