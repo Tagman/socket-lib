@@ -48,7 +48,8 @@ after_success:
   if [ -n "$COVERAGE" ]; then # only try to push to cov-sites if cov is available
     coveralls --verbose --root . -e external
     bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-  elif [ -n "$COVERAGE" ] && [ -n "$SCAN" ]; then
+  fi
+  if [ -n "$COVERAGE" ] && [ -n "$SCAN" ]; then
     ./scripts/deploy.sh travis-push
   fi
 
