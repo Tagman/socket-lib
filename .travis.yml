@@ -40,27 +40,30 @@ install:
 
 script:
   - ../../scripts/build.sh $COVERAGE $SCAN 
-  - cd ../..
-  - ls -al $TRAVIS_BUILD_DIR/artifacts/*/*
+  - cd ../.. #back to root dir
+  - ls -al $TRAVIS_BUILD_DIR/artifacts/*/* #check how build artifact structure looks like
 
 after_success:
 - |
-  if [ -n "$COVERAGE" ]; then
+  if [ -n "$COVERAGE" ]; then # only try to push to cov-sites if cov is available
     coveralls --verbose --root . -e external
     bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+  elif [ -n "$COVERAGE" ] && [ -n "$SCAN" ]; then
+    ./scripts/deploy.sh travis-push
   fi
-  git fetch origin
-  git branch -v -a
-  git checkout -b stage_page origin/stage_page
-  ../../scripts/deploy.sh Test
 
+
+
+  #git fetch origin
+  #git branch -v -a
+  #git checkout -b stage_page origin/stage_page
+  #../../scripts/deploy.sh Test
 
 #deploy:
- # provider: pages
-  #skip-cleanup: true
-  #github-token: $GITHUB_TOKEN
- # keep-history: true
- # on:
- #   branch: master
- ## local-dir: artifacts/results/result_coverage/
- # verbose: true
+#  provider: pages
+#  skip-cleanup: true
+#  github-token: $GITHUB_TOKEN
+#  local-dir: artifacts/results/
+#  on:
+#    branch: master  
+#  verbose: true
