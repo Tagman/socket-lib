@@ -9,7 +9,7 @@ else
     cp ${SCRIPT_DIR}/index.html ${ARTIFACT_DIR}/results/index.html
 
     cd ${PROJECT_ROOT}
-    git clone https://$GITHUB_TOKEN:x-oauth-basic@github.com/tagman/socket-lib.git tmp
+    git clone https://$GITHUB_TOKEN:x-oauth-basic@github.com/tagman/socket-lib.git tmp &2>/dev/null
     cd tmp
     git fetch
     git checkout gh-pages
@@ -20,7 +20,7 @@ else
 
     git add .
     git commit -m $1
-    git push
+    git push &2>/dev/null
 
     #cd ${SCRIPT_DIR}/..
 
