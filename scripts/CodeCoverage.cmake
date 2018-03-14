@@ -68,12 +68,25 @@
 
 include(CMakeParseArguments)
 
+# Do gcc + clang common stuff
+
+
+
+
+# Check which compiler is used
+
+
+# do compiler specific setup like..
 # Check prereqs
 find_program( GCOV_PATH gcov )
 find_program( LCOV_PATH  NAMES lcov lcov.bat lcov.exe lcov.perl)
 find_program( GENHTML_PATH NAMES genhtml genhtml.perl genhtml.bat )
 find_program( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/scripts/test)
 find_program( SIMPLE_PYTHON_EXECUTABLE python )
+
+# check llvm-profdata
+#llvm-cov
+#
 
 if(NOT GCOV_PATH)
     message(FATAL_ERROR "gcov not found! Aborting...")
@@ -87,6 +100,9 @@ elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
     message(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
 endif()
 
+
+## Clang: set compiler flags
+# -fprofile-instr-generate -fcoverage-mapping
 set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
     CACHE INTERNAL "")
 
@@ -112,13 +128,14 @@ mark_as_advanced(
     CMAKE_EXE_LINKER_FLAGS_COVERAGE
     CMAKE_SHARED_LINKER_FLAGS_COVERAGE )
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # and UnitTest
     message(WARNING "Code coverage results with an optimised (non-Debug) build may be misleading")
 endif() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     link_libraries(gcov)
 else()
+    # might need to change for clang, or delete or smth
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
@@ -139,6 +156,8 @@ function(SETUP_TARGET_FOR_COVERAGE)
     set(multiValueArgs EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+
+    ##if gcc
     if(NOT LCOV_PATH)
         message(FATAL_ERROR "lcov not found! Aborting...")
     endif() # NOT LCOV_PATH
@@ -170,6 +189,15 @@ function(SETUP_TARGET_FOR_COVERAGE)
         DEPENDS ${Coverage_DEPENDENCIES}
         COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
     )
+
+    ##end if gcc
+
+    ## add custom target for llvm-cov command sequence
+
+    #
+
+    #
+    
 
     # Show info where to find the report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
