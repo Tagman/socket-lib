@@ -8,6 +8,7 @@ addons:
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty-5.0
     packages:
+      - llvm-5.0
       - lcov
       - clang-5.0
 
@@ -28,6 +29,8 @@ matrix:
   - compiler: gcc
     env: SCAN="-s"
   - compiler: gcc
+    env: COVERAGE="-c" SCAN="-s"
+  - compiler: clang
     env: COVERAGE="-c" SCAN="-s"
 
 before_install:
