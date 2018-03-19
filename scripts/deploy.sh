@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 if [ $# -ne 1 ]; then
     echo "Usage: deploy.sh <Commit Message>"
 else
