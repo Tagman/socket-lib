@@ -90,7 +90,8 @@ if ( CMAKE_BUILD_TYPE STREQUAL "UnitTest" )
                         # add way to run all unittests with one target
                         SETUP_TARGET_FOR_COVERAGE(
                                 NAME result_coverage
-                                EXECUTABLE unit_TCP --gtest_output="xml:result_unit.xml" -j ${PROCESSOR_COUNT}
+                                EXECUTABLE unit_TCP
+                                EXECUTABLE_ARGS --gtest_output="xml:result_unit.xml" -j ${PROCESSOR_COUNT}
                                 DEPENDENCIES unit_TCP
                         )
                         

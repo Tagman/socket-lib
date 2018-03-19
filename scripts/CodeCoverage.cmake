@@ -74,37 +74,57 @@ include(CMakeParseArguments)
 
 
 # Check which compiler is used
-
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    message( STATUS "Clang detected!!!cd ")
+    set(CLANG_USED TRUE)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    message( STATUS "GCC detected!!!" )
+    set(GCC_USED TRUE)
+else()
+    message(FATAL_ERROR "Neither gcc nor clang used! Aborting...")
+endif()
 
 # do compiler specific setup like..
 # Check prereqs
-find_program( GCOV_PATH gcov )
-find_program( LCOV_PATH  NAMES lcov lcov.bat lcov.exe lcov.perl)
-find_program( GENHTML_PATH NAMES genhtml genhtml.perl genhtml.bat )
-find_program( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/scripts/test)
-find_program( SIMPLE_PYTHON_EXECUTABLE python )
+if(GCC_USED)
+    find_program( GCOV_PATH gcov )
+    find_program( LCOV_PATH  NAMES lcov lcov.bat lcov.exe lcov.perl)
+    find_program( GENHTML_PATH NAMES genhtml genhtml.perl genhtml.bat )
+    find_program( GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/scripts/test)
+    find_program( SIMPLE_PYTHON_EXECUTABLE python )
+
+    if(NOT GCOV_PATH)
+        message(FATAL_ERROR "gcov not found! Aborting...")
+    endif() # NOT GCOV_PATH
+    set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
+    CACHE INTERNAL "")
+
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        link_libraries(gcov)
+    else()
+        # might need to change for clang, or delete or smth
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+    endif()
+
+elseif(CLANG_USED)
+    #check if everything is installed properly
+
+    set(COVERAGE_COMPILER_FLAGS "-g -O0 -fprofile-instr-generate -fcoverage-mapping"
+    CACHE INTERNAL "")
+
+
+endif(GCC_USED)
 
 # check llvm-profdata
 #llvm-cov
 #
 
-if(NOT GCOV_PATH)
-    message(FATAL_ERROR "gcov not found! Aborting...")
-endif() # NOT GCOV_PATH
 
-if("${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-    if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 3)
-        message(FATAL_ERROR "Clang version must be 3.0.0 or greater! Aborting...")
-    endif()
-elseif(NOT CMAKE_COMPILER_IS_GNUCXX)
-    message(FATAL_ERROR "Compiler is not GNU gcc! Aborting...")
-endif()
 
 
 ## Clang: set compiler flags
 # -fprofile-instr-generate -fcoverage-mapping
-set(COVERAGE_COMPILER_FLAGS "-g -O0 --coverage -fprofile-arcs -ftest-coverage"
-    CACHE INTERNAL "")
+
 
 set(CMAKE_CXX_FLAGS_COVERAGE
     ${COVERAGE_COMPILER_FLAGS}
@@ -132,12 +152,7 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # and UnitTest
     message(WARNING "Code coverage results with an optimised (non-Debug) build may be misleading")
 endif() # NOT CMAKE_BUILD_TYPE STREQUAL "Debug"
 
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    link_libraries(gcov)
-else()
-    # might need to change for clang, or delete or smth
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-endif()
+
 
 # Defines a target for running and collection code coverage information
 # Builds dependencies, runs the given executable and outputs reports.
@@ -158,38 +173,59 @@ function(SETUP_TARGET_FOR_COVERAGE)
 
 
     ##if gcc
-    if(NOT LCOV_PATH)
-        message(FATAL_ERROR "lcov not found! Aborting...")
-    endif() # NOT LCOV_PATH
+    if(GCC_USED)
+        if(NOT LCOV_PATH)
+            message(FATAL_ERROR "lcov not found! Aborting...")
+        endif() # NOT LCOV_PATH
 
-    if(NOT GENHTML_PATH)
-        message(FATAL_ERROR "genhtml not found! Aborting...")
-    endif() # NOT GENHTML_PATH
+        if(NOT GENHTML_PATH)
+            message(FATAL_ERROR "genhtml not found! Aborting...")
+        endif() # NOT GENHTML_PATH
 
-    # Setup target
+        # Setup target
+        add_custom_target(${Coverage_NAME}
+
+            # Cleanup lcov
+            COMMAND ${LCOV_PATH} --directory . --zerocounters
+            # Create baseline to make sure untouched files show up in the report
+            COMMAND ${LCOV_PATH} -c -i -d . -o ${Coverage_NAME}.base
+
+            # Run tests
+            COMMAND ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
+
+            # Capturing lcov counters and generating report
+            COMMAND ${LCOV_PATH} --rc lcov_branch_coverage=1 --directory . --capture --output-file ${Coverage_NAME}.info
+            # add baseline counters
+            COMMAND ${LCOV_PATH} --rc lcov_branch_coverage=1 -a ${Coverage_NAME}.base -a ${Coverage_NAME}.info --output-file ${Coverage_NAME}.total
+            COMMAND ${LCOV_PATH} --rc lcov_branch_coverage=1 --remove ${Coverage_NAME}.total ${COVERAGE_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
+            COMMAND ${GENHTML_PATH} --branch-coverage -o ${Coverage_NAME}_gcc ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
+            COMMAND ${CMAKE_COMMAND} -E remove ${Coverage_NAME}.base ${Coverage_NAME}.info ${Coverage_NAME}.total ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
+
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            DEPENDS ${Coverage_DEPENDENCIES}
+            COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
+        )
+    elseif(CLANG_USED)
+    
+    ##find LLVM paths automatically/ check if available
     add_custom_target(${Coverage_NAME}
 
-        # Cleanup lcov
-        COMMAND ${LCOV_PATH} --directory . --zerocounters
-        # Create baseline to make sure untouched files show up in the report
-        COMMAND ${LCOV_PATH} -c -i -d . -o ${Coverage_NAME}.base
+        #running instrumented program, defining raw output
+        COMMAND LLVM_PROFILE_FILE=${Coverage_NAME}.profraw ./${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
 
-        # Run tests
-        COMMAND ${Coverage_EXECUTABLE}
+        #indexing raw profiles
+        COMMAND llvm-profdata merge -sparse ${Coverage_NAME}.profraw -o ${Coverage_NAME}.profdata
 
-        # Capturing lcov counters and generating report
-        COMMAND ${LCOV_PATH} --rc lcov_branch_coverage=1 --directory . --capture --output-file ${Coverage_NAME}.info
-        # add baseline counters
-        COMMAND ${LCOV_PATH} --rc lcov_branch_coverage=1 -a ${Coverage_NAME}.base -a ${Coverage_NAME}.info --output-file ${Coverage_NAME}.total
-        COMMAND ${LCOV_PATH} --rc lcov_branch_coverage=1 --remove ${Coverage_NAME}.total ${COVERAGE_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
-        COMMAND ${GENHTML_PATH} --branch-coverage -o ${Coverage_NAME} ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
-        COMMAND ${CMAKE_COMMAND} -E remove ${Coverage_NAME}.base ${Coverage_NAME}.info ${Coverage_NAME}.total ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
+        #create coverage report
+        COMMAND llvm-cov show ${Coverage_EXECUTABLE} -instr-profile=${Coverage_NAME}.profdata -format=html -output-dir=${Coverage_NAME}_clang
 
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS ${Coverage_DEPENDENCIES}
-        COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage counters and generating report."
+        COMMENT "Resetting code coverage counters to zero.\nProcessing code coverage with clang and generating report."
     )
 
+
+    endif(GCC_USED) # end of gcc part
     ##end if gcc
 
     ## add custom target for llvm-cov command sequence
@@ -202,7 +238,7 @@ function(SETUP_TARGET_FOR_COVERAGE)
     # Show info where to find the report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
-        COMMENT "Open ./${Coverage_NAME}/index.html in your browser to view the coverage report."
+        COMMENT "Open ./${Coverage_NAME}_<compiler>/index.html in your browser to view the coverage report."
     )
 
 endfunction() # SETUP_TARGET_FOR_COVERAGE
