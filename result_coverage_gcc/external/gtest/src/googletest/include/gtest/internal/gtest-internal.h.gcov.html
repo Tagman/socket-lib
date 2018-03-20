@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2018-03-19</td>
+            <td class="headerValue">2018-03-20</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">10</td>
@@ -946,350 +946,406 @@
 <span class="lineNum">     875 </span>                :            : // a container class by checking the type of IsContainerTest&lt;C&gt;(0).
 <span class="lineNum">     876 </span>                :            : // The value of the expression is insignificant.
 <span class="lineNum">     877 </span>                :            : //
-<span class="lineNum">     878 </span>                :            : // Note that we look for both C::iterator and C::const_iterator.  The
-<span class="lineNum">     879 </span>                :            : // reason is that C++ injects the name of a class as a member of the
-<span class="lineNum">     880 </span>                :            : // class itself (e.g. you can refer to class iterator as either
-<span class="lineNum">     881 </span>                :            : // 'iterator' or 'iterator::iterator').  If we look for C::iterator
-<span class="lineNum">     882 </span>                :            : // only, for example, we would mistakenly think that a class named
-<span class="lineNum">     883 </span>                :            : // iterator is an STL container.
-<span class="lineNum">     884 </span>                :            : //
-<span class="lineNum">     885 </span>                :            : // Also note that the simpler approach of overloading
-<span class="lineNum">     886 </span>                :            : // IsContainerTest(typename C::const_iterator*) and
-<span class="lineNum">     887 </span>                :            : // IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
-<span class="lineNum">     888 </span>                :            : typedef int IsContainer;
-<span class="lineNum">     889 </span>                :            : template &lt;class C&gt;
-<span class="lineNum">     890 </span>                :            : IsContainer IsContainerTest(int /* dummy */,
-<span class="lineNum">     891 </span>                :            :                             typename C::iterator* /* it */ = NULL,
-<span class="lineNum">     892 </span>                :            :                             typename C::const_iterator* /* const_it */ = NULL) {
-<span class="lineNum">     893 </span>                :            :   return 0;
-<span class="lineNum">     894 </span>                :            : }
-<span class="lineNum">     895 </span>                :            : 
-<span class="lineNum">     896 </span>                :            : typedef char IsNotContainer;
-<span class="lineNum">     897 </span>                :            : template &lt;class C&gt;
-<span class="lineNum">     898 </span>                :            : IsNotContainer IsContainerTest(long /* dummy */) { return '\0'; }
-<span class="lineNum">     899 </span>                :            : 
-<span class="lineNum">     900 </span>                :            : template &lt;typename C, bool = 
-<span class="lineNum">     901 </span>                :            :   sizeof(IsContainerTest&lt;C&gt;(0)) == sizeof(IsContainer)
-<span class="lineNum">     902 </span>                :            : &gt;
-<span class="lineNum">     903 </span>                :            : struct IsRecursiveContainerImpl;
-<span class="lineNum">     904 </span>                :            : 
-<span class="lineNum">     905 </span>                :            : template &lt;typename C&gt;
-<span class="lineNum">     906 </span>                :            : struct IsRecursiveContainerImpl&lt;C, false&gt; : public false_type {};
-<span class="lineNum">     907 </span>                :            : 
-<span class="lineNum">     908 </span>                :            : template &lt;typename C&gt;
-<span class="lineNum">     909 </span>                :            : struct IsRecursiveContainerImpl&lt;C, true&gt; {
-<span class="lineNum">     910 </span>                :            :   typedef
-<span class="lineNum">     911 </span>                :            :     typename IteratorTraits&lt;typename C::iterator&gt;::value_type
-<span class="lineNum">     912 </span>                :            :   value_type;
-<span class="lineNum">     913 </span>                :            :   typedef is_same&lt;value_type, C&gt; type;
-<span class="lineNum">     914 </span>                :            : };
-<span class="lineNum">     915 </span>                :            : 
-<span class="lineNum">     916 </span>                :            : // IsRecursiveContainer&lt;Type&gt; is a unary compile-time predicate that
-<span class="lineNum">     917 </span>                :            : // evaluates whether C is a recursive container type. A recursive container 
-<span class="lineNum">     918 </span>                :            : // type is a container type whose value_type is equal to the container type
-<span class="lineNum">     919 </span>                :            : // itself. An example for a recursive container type is 
-<span class="lineNum">     920 </span>                :            : // boost::filesystem::path, whose iterator has a value_type that is equal to 
-<span class="lineNum">     921 </span>                :            : // boost::filesystem::path.
-<span class="lineNum">     922 </span>                :            : template&lt;typename C&gt;
-<span class="lineNum">     923 </span>                :            : struct IsRecursiveContainer : public IsRecursiveContainerImpl&lt;C&gt;::type {};
-<span class="lineNum">     924 </span>                :            : 
-<span class="lineNum">     925 </span>                :            : // EnableIf&lt;condition&gt;::type is void when 'Cond' is true, and
-<span class="lineNum">     926 </span>                :            : // undefined when 'Cond' is false.  To use SFINAE to make a function
-<span class="lineNum">     927 </span>                :            : // overload only apply when a particular expression is true, add
-<span class="lineNum">     928 </span>                :            : // &quot;typename EnableIf&lt;expression&gt;::type* = 0&quot; as the last parameter.
-<span class="lineNum">     929 </span>                :            : template&lt;bool&gt; struct EnableIf;
-<span class="lineNum">     930 </span>                :            : template&lt;&gt; struct EnableIf&lt;true&gt; { typedef void type; };  // NOLINT
-<span class="lineNum">     931 </span>                :            : 
-<span class="lineNum">     932 </span>                :            : // Utilities for native arrays.
-<span class="lineNum">     933 </span>                :            : 
-<span class="lineNum">     934 </span>                :            : // ArrayEq() compares two k-dimensional native arrays using the
-<span class="lineNum">     935 </span>                :            : // elements' operator==, where k can be any integer &gt;= 0.  When k is
-<span class="lineNum">     936 </span>                :            : // 0, ArrayEq() degenerates into comparing a single pair of values.
-<span class="lineNum">     937 </span>                :            : 
-<span class="lineNum">     938 </span>                :            : template &lt;typename T, typename U&gt;
-<span class="lineNum">     939 </span>                :            : bool ArrayEq(const T* lhs, size_t size, const U* rhs);
+<span class="lineNum">     878 </span>                :            : // In C++11 mode we check the existence of a const_iterator and that an
+<span class="lineNum">     879 </span>                :            : // iterator is properly implemented for the container.
+<span class="lineNum">     880 </span>                :            : //
+<span class="lineNum">     881 </span>                :            : // For pre-C++11 that we look for both C::iterator and C::const_iterator.
+<span class="lineNum">     882 </span>                :            : // The reason is that C++ injects the name of a class as a member of the
+<span class="lineNum">     883 </span>                :            : // class itself (e.g. you can refer to class iterator as either
+<span class="lineNum">     884 </span>                :            : // 'iterator' or 'iterator::iterator').  If we look for C::iterator
+<span class="lineNum">     885 </span>                :            : // only, for example, we would mistakenly think that a class named
+<span class="lineNum">     886 </span>                :            : // iterator is an STL container.
+<span class="lineNum">     887 </span>                :            : //
+<span class="lineNum">     888 </span>                :            : // Also note that the simpler approach of overloading
+<span class="lineNum">     889 </span>                :            : // IsContainerTest(typename C::const_iterator*) and
+<span class="lineNum">     890 </span>                :            : // IsContainerTest(...) doesn't work with Visual Age C++ and Sun C++.
+<span class="lineNum">     891 </span>                :            : typedef int IsContainer;
+<span class="lineNum">     892 </span>                :            : #if GTEST_LANG_CXX11
+<span class="lineNum">     893 </span>                :            : template &lt;class C,
+<span class="lineNum">     894 </span>                :            :           class Iterator = decltype(::std::declval&lt;const C&amp;&gt;().begin()),
+<span class="lineNum">     895 </span>                :            :           class = decltype(::std::declval&lt;const C&amp;&gt;().end()),
+<span class="lineNum">     896 </span>                :            :           class = decltype(++::std::declval&lt;Iterator&amp;&gt;()),
+<span class="lineNum">     897 </span>                :            :           class = decltype(*::std::declval&lt;Iterator&gt;()),
+<span class="lineNum">     898 </span>                :            :           class = typename C::const_iterator&gt;
+<span class="lineNum">     899 </span>                :            : IsContainer IsContainerTest(int /* dummy */) {
+<span class="lineNum">     900 </span>                :            :   return 0;
+<span class="lineNum">     901 </span>                :            : }
+<span class="lineNum">     902 </span>                :            : #else
+<span class="lineNum">     903 </span>                :            : template &lt;class C&gt;
+<span class="lineNum">     904 </span>                :            : IsContainer IsContainerTest(int /* dummy */,
+<span class="lineNum">     905 </span>                :            :                             typename C::iterator* /* it */ = NULL,
+<span class="lineNum">     906 </span>                :            :                             typename C::const_iterator* /* const_it */ = NULL) {
+<span class="lineNum">     907 </span>                :            :   return 0;
+<span class="lineNum">     908 </span>                :            : }
+<span class="lineNum">     909 </span>                :            : #endif  // GTEST_LANG_CXX11
+<span class="lineNum">     910 </span>                :            : 
+<span class="lineNum">     911 </span>                :            : typedef char IsNotContainer;
+<span class="lineNum">     912 </span>                :            : template &lt;class C&gt;
+<span class="lineNum">     913 </span>                :            : IsNotContainer IsContainerTest(long /* dummy */) { return '\0'; }
+<span class="lineNum">     914 </span>                :            : 
+<span class="lineNum">     915 </span>                :            : // Trait to detect whether a type T is a hash table.
+<span class="lineNum">     916 </span>                :            : // The heuristic used is that the type contains an inner type `hasher` and does
+<span class="lineNum">     917 </span>                :            : // not contain an inner type `reverse_iterator`.
+<span class="lineNum">     918 </span>                :            : // If the container is iterable in reverse, then order might actually matter.
+<span class="lineNum">     919 </span>                :            : template &lt;typename T&gt;
+<span class="lineNum">     920 </span>                :            : struct IsHashTable {
+<span class="lineNum">     921 </span>                :            :  private:
+<span class="lineNum">     922 </span>                :            :   template &lt;typename U&gt;
+<span class="lineNum">     923 </span>                :            :   static char test(typename U::hasher*, typename U::reverse_iterator*);
+<span class="lineNum">     924 </span>                :            :   template &lt;typename U&gt;
+<span class="lineNum">     925 </span>                :            :   static int test(typename U::hasher*, ...);
+<span class="lineNum">     926 </span>                :            :   template &lt;typename U&gt;
+<span class="lineNum">     927 </span>                :            :   static char test(...);
+<span class="lineNum">     928 </span>                :            : 
+<span class="lineNum">     929 </span>                :            :  public:
+<span class="lineNum">     930 </span>                :            :   static const bool value = sizeof(test&lt;T&gt;(0, 0)) == sizeof(int);
+<span class="lineNum">     931 </span>                :            : };
+<span class="lineNum">     932 </span>                :            : 
+<span class="lineNum">     933 </span>                :            : template &lt;typename T&gt;
+<span class="lineNum">     934 </span>                :            : const bool IsHashTable&lt;T&gt;::value;
+<span class="lineNum">     935 </span>                :            : 
+<span class="lineNum">     936 </span>                :            : template&lt;typename T&gt;
+<span class="lineNum">     937 </span>                :            : struct VoidT {
+<span class="lineNum">     938 </span>                :            :     typedef void value_type;
+<span class="lineNum">     939 </span>                :            : };
 <span class="lineNum">     940 </span>                :            : 
-<span class="lineNum">     941 </span>                :            : // This generic version is used when k is 0.
-<span class="lineNum">     942 </span>                :            : template &lt;typename T, typename U&gt;
-<span class="lineNum">     943 </span>                :            : inline bool ArrayEq(const T&amp; lhs, const U&amp; rhs) { return lhs == rhs; }
-<span class="lineNum">     944 </span>                :            : 
-<span class="lineNum">     945 </span>                :            : // This overload is used when k &gt;= 1.
-<span class="lineNum">     946 </span>                :            : template &lt;typename T, typename U, size_t N&gt;
-<span class="lineNum">     947 </span>                :            : inline bool ArrayEq(const T(&amp;lhs)[N], const U(&amp;rhs)[N]) {
-<span class="lineNum">     948 </span>                :            :   return internal::ArrayEq(lhs, N, rhs);
-<span class="lineNum">     949 </span>                :            : }
-<span class="lineNum">     950 </span>                :            : 
-<span class="lineNum">     951 </span>                :            : // This helper reduces code bloat.  If we instead put its logic inside
-<span class="lineNum">     952 </span>                :            : // the previous ArrayEq() function, arrays with different sizes would
-<span class="lineNum">     953 </span>                :            : // lead to different copies of the template code.
-<span class="lineNum">     954 </span>                :            : template &lt;typename T, typename U&gt;
-<span class="lineNum">     955 </span>                :            : bool ArrayEq(const T* lhs, size_t size, const U* rhs) {
-<span class="lineNum">     956 </span>                :            :   for (size_t i = 0; i != size; i++) {
-<span class="lineNum">     957 </span>                :            :     if (!internal::ArrayEq(lhs[i], rhs[i]))
-<span class="lineNum">     958 </span>                :            :       return false;
-<span class="lineNum">     959 </span>                :            :   }
-<span class="lineNum">     960 </span>                :            :   return true;
-<span class="lineNum">     961 </span>                :            : }
-<span class="lineNum">     962 </span>                :            : 
-<span class="lineNum">     963 </span>                :            : // Finds the first element in the iterator range [begin, end) that
-<span class="lineNum">     964 </span>                :            : // equals elem.  Element may be a native array type itself.
-<span class="lineNum">     965 </span>                :            : template &lt;typename Iter, typename Element&gt;
-<span class="lineNum">     966 </span>                :            : Iter ArrayAwareFind(Iter begin, Iter end, const Element&amp; elem) {
-<span class="lineNum">     967 </span>                :            :   for (Iter it = begin; it != end; ++it) {
-<span class="lineNum">     968 </span>                :            :     if (internal::ArrayEq(*it, elem))
-<span class="lineNum">     969 </span>                :            :       return it;
-<span class="lineNum">     970 </span>                :            :   }
-<span class="lineNum">     971 </span>                :            :   return end;
-<span class="lineNum">     972 </span>                :            : }
-<span class="lineNum">     973 </span>                :            : 
-<span class="lineNum">     974 </span>                :            : // CopyArray() copies a k-dimensional native array using the elements'
-<span class="lineNum">     975 </span>                :            : // operator=, where k can be any integer &gt;= 0.  When k is 0,
-<span class="lineNum">     976 </span>                :            : // CopyArray() degenerates into copying a single value.
-<span class="lineNum">     977 </span>                :            : 
-<span class="lineNum">     978 </span>                :            : template &lt;typename T, typename U&gt;
-<span class="lineNum">     979 </span>                :            : void CopyArray(const T* from, size_t size, U* to);
-<span class="lineNum">     980 </span>                :            : 
-<span class="lineNum">     981 </span>                :            : // This generic version is used when k is 0.
-<span class="lineNum">     982 </span>                :            : template &lt;typename T, typename U&gt;
-<span class="lineNum">     983 </span>                :            : inline void CopyArray(const T&amp; from, U* to) { *to = from; }
-<span class="lineNum">     984 </span>                :            : 
-<span class="lineNum">     985 </span>                :            : // This overload is used when k &gt;= 1.
-<span class="lineNum">     986 </span>                :            : template &lt;typename T, typename U, size_t N&gt;
-<span class="lineNum">     987 </span>                :            : inline void CopyArray(const T(&amp;from)[N], U(*to)[N]) {
-<span class="lineNum">     988 </span>                :            :   internal::CopyArray(from, N, *to);
-<span class="lineNum">     989 </span>                :            : }
+<span class="lineNum">     941 </span>                :            : template &lt;typename T, typename = void&gt;
+<span class="lineNum">     942 </span>                :            : struct HasValueType : false_type {};
+<span class="lineNum">     943 </span>                :            : template &lt;typename T&gt;
+<span class="lineNum">     944 </span>                :            : struct HasValueType&lt;T, VoidT&lt;typename T::value_type&gt; &gt; : true_type {
+<span class="lineNum">     945 </span>                :            : };
+<span class="lineNum">     946 </span>                :            : 
+<span class="lineNum">     947 </span>                :            : template &lt;typename C,
+<span class="lineNum">     948 </span>                :            :           bool = sizeof(IsContainerTest&lt;C&gt;(0)) == sizeof(IsContainer),
+<span class="lineNum">     949 </span>                :            :           bool = HasValueType&lt;C&gt;::value&gt;
+<span class="lineNum">     950 </span>                :            : struct IsRecursiveContainerImpl;
+<span class="lineNum">     951 </span>                :            : 
+<span class="lineNum">     952 </span>                :            : template &lt;typename C, bool HV&gt;
+<span class="lineNum">     953 </span>                :            : struct IsRecursiveContainerImpl&lt;C, false, HV&gt; : public false_type {};
+<span class="lineNum">     954 </span>                :            : 
+<span class="lineNum">     955 </span>                :            : // Since the IsRecursiveContainerImpl depends on the IsContainerTest we need to
+<span class="lineNum">     956 </span>                :            : // obey the same inconsistencies as the IsContainerTest, namely check if
+<span class="lineNum">     957 </span>                :            : // something is a container is relying on only const_iterator in C++11 and
+<span class="lineNum">     958 </span>                :            : // is relying on both const_iterator and iterator otherwise
+<span class="lineNum">     959 </span>                :            : template &lt;typename C&gt;
+<span class="lineNum">     960 </span>                :            : struct IsRecursiveContainerImpl&lt;C, true, false&gt; : public false_type {};
+<span class="lineNum">     961 </span>                :            : 
+<span class="lineNum">     962 </span>                :            : template &lt;typename C&gt;
+<span class="lineNum">     963 </span>                :            : struct IsRecursiveContainerImpl&lt;C, true, true&gt; {
+<span class="lineNum">     964 </span>                :            :   #if GTEST_LANG_CXX11
+<span class="lineNum">     965 </span>                :            :   typedef typename IteratorTraits&lt;typename C::const_iterator&gt;::value_type
+<span class="lineNum">     966 </span>                :            :       value_type;
+<span class="lineNum">     967 </span>                :            : #else
+<span class="lineNum">     968 </span>                :            :   typedef typename IteratorTraits&lt;typename C::iterator&gt;::value_type value_type;
+<span class="lineNum">     969 </span>                :            : #endif
+<span class="lineNum">     970 </span>                :            :   typedef is_same&lt;value_type, C&gt; type;
+<span class="lineNum">     971 </span>                :            : };
+<span class="lineNum">     972 </span>                :            : 
+<span class="lineNum">     973 </span>                :            : // IsRecursiveContainer&lt;Type&gt; is a unary compile-time predicate that
+<span class="lineNum">     974 </span>                :            : // evaluates whether C is a recursive container type. A recursive container
+<span class="lineNum">     975 </span>                :            : // type is a container type whose value_type is equal to the container type
+<span class="lineNum">     976 </span>                :            : // itself. An example for a recursive container type is
+<span class="lineNum">     977 </span>                :            : // boost::filesystem::path, whose iterator has a value_type that is equal to
+<span class="lineNum">     978 </span>                :            : // boost::filesystem::path.
+<span class="lineNum">     979 </span>                :            : template &lt;typename C&gt;
+<span class="lineNum">     980 </span>                :            : struct IsRecursiveContainer : public IsRecursiveContainerImpl&lt;C&gt;::type {};
+<span class="lineNum">     981 </span>                :            : 
+<span class="lineNum">     982 </span>                :            : // EnableIf&lt;condition&gt;::type is void when 'Cond' is true, and
+<span class="lineNum">     983 </span>                :            : // undefined when 'Cond' is false.  To use SFINAE to make a function
+<span class="lineNum">     984 </span>                :            : // overload only apply when a particular expression is true, add
+<span class="lineNum">     985 </span>                :            : // &quot;typename EnableIf&lt;expression&gt;::type* = 0&quot; as the last parameter.
+<span class="lineNum">     986 </span>                :            : template&lt;bool&gt; struct EnableIf;
+<span class="lineNum">     987 </span>                :            : template&lt;&gt; struct EnableIf&lt;true&gt; { typedef void type; };  // NOLINT
+<span class="lineNum">     988 </span>                :            : 
+<span class="lineNum">     989 </span>                :            : // Utilities for native arrays.
 <span class="lineNum">     990 </span>                :            : 
-<span class="lineNum">     991 </span>                :            : // This helper reduces code bloat.  If we instead put its logic inside
-<span class="lineNum">     992 </span>                :            : // the previous CopyArray() function, arrays with different sizes
-<span class="lineNum">     993 </span>                :            : // would lead to different copies of the template code.
-<span class="lineNum">     994 </span>                :            : template &lt;typename T, typename U&gt;
-<span class="lineNum">     995 </span>                :            : void CopyArray(const T* from, size_t size, U* to) {
-<span class="lineNum">     996 </span>                :            :   for (size_t i = 0; i != size; i++) {
-<span class="lineNum">     997 </span>                :            :     internal::CopyArray(from[i], to + i);
-<span class="lineNum">     998 </span>                :            :   }
-<span class="lineNum">     999 </span>                :            : }
-<span class="lineNum">    1000 </span>                :            : 
-<span class="lineNum">    1001 </span>                :            : // The relation between an NativeArray object (see below) and the
-<span class="lineNum">    1002 </span>                :            : // native array it represents.
-<span class="lineNum">    1003 </span>                :            : // We use 2 different structs to allow non-copyable types to be used, as long
-<span class="lineNum">    1004 </span>                :            : // as RelationToSourceReference() is passed.
-<span class="lineNum">    1005 </span>                :            : struct RelationToSourceReference {};
-<span class="lineNum">    1006 </span>                :            : struct RelationToSourceCopy {};
+<span class="lineNum">     991 </span>                :            : // ArrayEq() compares two k-dimensional native arrays using the
+<span class="lineNum">     992 </span>                :            : // elements' operator==, where k can be any integer &gt;= 0.  When k is
+<span class="lineNum">     993 </span>                :            : // 0, ArrayEq() degenerates into comparing a single pair of values.
+<span class="lineNum">     994 </span>                :            : 
+<span class="lineNum">     995 </span>                :            : template &lt;typename T, typename U&gt;
+<span class="lineNum">     996 </span>                :            : bool ArrayEq(const T* lhs, size_t size, const U* rhs);
+<span class="lineNum">     997 </span>                :            : 
+<span class="lineNum">     998 </span>                :            : // This generic version is used when k is 0.
+<span class="lineNum">     999 </span>                :            : template &lt;typename T, typename U&gt;
+<span class="lineNum">    1000 </span>                :            : inline bool ArrayEq(const T&amp; lhs, const U&amp; rhs) { return lhs == rhs; }
+<span class="lineNum">    1001 </span>                :            : 
+<span class="lineNum">    1002 </span>                :            : // This overload is used when k &gt;= 1.
+<span class="lineNum">    1003 </span>                :            : template &lt;typename T, typename U, size_t N&gt;
+<span class="lineNum">    1004 </span>                :            : inline bool ArrayEq(const T(&amp;lhs)[N], const U(&amp;rhs)[N]) {
+<span class="lineNum">    1005 </span>                :            :   return internal::ArrayEq(lhs, N, rhs);
+<span class="lineNum">    1006 </span>                :            : }
 <span class="lineNum">    1007 </span>                :            : 
-<span class="lineNum">    1008 </span>                :            : // Adapts a native array to a read-only STL-style container.  Instead
-<span class="lineNum">    1009 </span>                :            : // of the complete STL container concept, this adaptor only implements
-<span class="lineNum">    1010 </span>                :            : // members useful for Google Mock's container matchers.  New members
-<span class="lineNum">    1011 </span>                :            : // should be added as needed.  To simplify the implementation, we only
-<span class="lineNum">    1012 </span>                :            : // support Element being a raw type (i.e. having no top-level const or
-<span class="lineNum">    1013 </span>                :            : // reference modifier).  It's the client's responsibility to satisfy
-<span class="lineNum">    1014 </span>                :            : // this requirement.  Element can be an array type itself (hence
-<span class="lineNum">    1015 </span>                :            : // multi-dimensional arrays are supported).
-<span class="lineNum">    1016 </span>                :            : template &lt;typename Element&gt;
-<span class="lineNum">    1017 </span>                :            : class NativeArray {
-<span class="lineNum">    1018 </span>                :            :  public:
-<span class="lineNum">    1019 </span>                :            :   // STL-style container typedefs.
-<span class="lineNum">    1020 </span>                :            :   typedef Element value_type;
-<span class="lineNum">    1021 </span>                :            :   typedef Element* iterator;
-<span class="lineNum">    1022 </span>                :            :   typedef const Element* const_iterator;
-<span class="lineNum">    1023 </span>                :            : 
-<span class="lineNum">    1024 </span>                :            :   // Constructs from a native array. References the source.
-<span class="lineNum">    1025 </span>                :            :   NativeArray(const Element* array, size_t count, RelationToSourceReference) {
-<span class="lineNum">    1026 </span>                :            :     InitRef(array, count);
+<span class="lineNum">    1008 </span>                :            : // This helper reduces code bloat.  If we instead put its logic inside
+<span class="lineNum">    1009 </span>                :            : // the previous ArrayEq() function, arrays with different sizes would
+<span class="lineNum">    1010 </span>                :            : // lead to different copies of the template code.
+<span class="lineNum">    1011 </span>                :            : template &lt;typename T, typename U&gt;
+<span class="lineNum">    1012 </span>                :            : bool ArrayEq(const T* lhs, size_t size, const U* rhs) {
+<span class="lineNum">    1013 </span>                :            :   for (size_t i = 0; i != size; i++) {
+<span class="lineNum">    1014 </span>                :            :     if (!internal::ArrayEq(lhs[i], rhs[i]))
+<span class="lineNum">    1015 </span>                :            :       return false;
+<span class="lineNum">    1016 </span>                :            :   }
+<span class="lineNum">    1017 </span>                :            :   return true;
+<span class="lineNum">    1018 </span>                :            : }
+<span class="lineNum">    1019 </span>                :            : 
+<span class="lineNum">    1020 </span>                :            : // Finds the first element in the iterator range [begin, end) that
+<span class="lineNum">    1021 </span>                :            : // equals elem.  Element may be a native array type itself.
+<span class="lineNum">    1022 </span>                :            : template &lt;typename Iter, typename Element&gt;
+<span class="lineNum">    1023 </span>                :            : Iter ArrayAwareFind(Iter begin, Iter end, const Element&amp; elem) {
+<span class="lineNum">    1024 </span>                :            :   for (Iter it = begin; it != end; ++it) {
+<span class="lineNum">    1025 </span>                :            :     if (internal::ArrayEq(*it, elem))
+<span class="lineNum">    1026 </span>                :            :       return it;
 <span class="lineNum">    1027 </span>                :            :   }
-<span class="lineNum">    1028 </span>                :            : 
-<span class="lineNum">    1029 </span>                :            :   // Constructs from a native array. Copies the source.
-<span class="lineNum">    1030 </span>                :            :   NativeArray(const Element* array, size_t count, RelationToSourceCopy) {
-<span class="lineNum">    1031 </span>                :            :     InitCopy(array, count);
-<span class="lineNum">    1032 </span>                :            :   }
-<span class="lineNum">    1033 </span>                :            : 
-<span class="lineNum">    1034 </span>                :            :   // Copy constructor.
-<span class="lineNum">    1035 </span>                :            :   NativeArray(const NativeArray&amp; rhs) {
-<span class="lineNum">    1036 </span>                :            :     (this-&gt;*rhs.clone_)(rhs.array_, rhs.size_);
-<span class="lineNum">    1037 </span>                :            :   }
-<span class="lineNum">    1038 </span>                :            : 
-<span class="lineNum">    1039 </span>                :            :   ~NativeArray() {
-<span class="lineNum">    1040 </span>                :            :     if (clone_ != &amp;NativeArray::InitRef)
-<span class="lineNum">    1041 </span>                :            :       delete[] array_;
-<span class="lineNum">    1042 </span>                :            :   }
-<span class="lineNum">    1043 </span>                :            : 
-<span class="lineNum">    1044 </span>                :            :   // STL-style container methods.
-<span class="lineNum">    1045 </span>                :            :   size_t size() const { return size_; }
-<span class="lineNum">    1046 </span>                :            :   const_iterator begin() const { return array_; }
-<span class="lineNum">    1047 </span>                :            :   const_iterator end() const { return array_ + size_; }
-<span class="lineNum">    1048 </span>                :            :   bool operator==(const NativeArray&amp; rhs) const {
-<span class="lineNum">    1049 </span>                :            :     return size() == rhs.size() &amp;&amp;
-<span class="lineNum">    1050 </span>                :            :         ArrayEq(begin(), size(), rhs.begin());
-<span class="lineNum">    1051 </span>                :            :   }
-<span class="lineNum">    1052 </span>                :            : 
-<span class="lineNum">    1053 </span>                :            :  private:
-<span class="lineNum">    1054 </span>                :            :   enum {
-<span class="lineNum">    1055 </span>                :            :     kCheckTypeIsNotConstOrAReference = StaticAssertTypeEqHelper&lt;
-<span class="lineNum">    1056 </span>                :            :         Element, GTEST_REMOVE_REFERENCE_AND_CONST_(Element)&gt;::value
-<span class="lineNum">    1057 </span>                :            :   };
-<span class="lineNum">    1058 </span>                :            : 
-<span class="lineNum">    1059 </span>                :            :   // Initializes this object with a copy of the input.
-<span class="lineNum">    1060 </span>                :            :   void InitCopy(const Element* array, size_t a_size) {
-<span class="lineNum">    1061 </span>                :            :     Element* const copy = new Element[a_size];
-<span class="lineNum">    1062 </span>                :            :     CopyArray(array, a_size, copy);
-<span class="lineNum">    1063 </span>                :            :     array_ = copy;
-<span class="lineNum">    1064 </span>                :            :     size_ = a_size;
-<span class="lineNum">    1065 </span>                :            :     clone_ = &amp;NativeArray::InitCopy;
-<span class="lineNum">    1066 </span>                :            :   }
-<span class="lineNum">    1067 </span>                :            : 
-<span class="lineNum">    1068 </span>                :            :   // Initializes this object with a reference of the input.
-<span class="lineNum">    1069 </span>                :            :   void InitRef(const Element* array, size_t a_size) {
-<span class="lineNum">    1070 </span>                :            :     array_ = array;
-<span class="lineNum">    1071 </span>                :            :     size_ = a_size;
-<span class="lineNum">    1072 </span>                :            :     clone_ = &amp;NativeArray::InitRef;
-<span class="lineNum">    1073 </span>                :            :   }
-<span class="lineNum">    1074 </span>                :            : 
-<span class="lineNum">    1075 </span>                :            :   const Element* array_;
-<span class="lineNum">    1076 </span>                :            :   size_t size_;
-<span class="lineNum">    1077 </span>                :            :   void (NativeArray::*clone_)(const Element*, size_t);
-<span class="lineNum">    1078 </span>                :            : 
-<span class="lineNum">    1079 </span>                :            :   GTEST_DISALLOW_ASSIGN_(NativeArray);
-<span class="lineNum">    1080 </span>                :            : };
-<span class="lineNum">    1081 </span>                :            : 
-<span class="lineNum">    1082 </span>                :            : }  // namespace internal
-<span class="lineNum">    1083 </span>                :            : }  // namespace testing
-<span class="lineNum">    1084 </span>                :            : 
-<span class="lineNum">    1085 </span>                :            : #define GTEST_MESSAGE_AT_(file, line, message, result_type) \
-<span class="lineNum">    1086 </span>                :            :   ::testing::internal::AssertHelper(result_type, file, line, message) \
-<span class="lineNum">    1087 </span>                :            :     = ::testing::Message()
-<span class="lineNum">    1088 </span>                :            : 
-<span class="lineNum">    1089 </span>                :            : #define GTEST_MESSAGE_(message, result_type) \
-<span class="lineNum">    1090 </span>                :            :   GTEST_MESSAGE_AT_(__FILE__, __LINE__, message, result_type)
-<span class="lineNum">    1091 </span>                :            : 
-<span class="lineNum">    1092 </span>                :            : #define GTEST_FATAL_FAILURE_(message) \
-<span class="lineNum">    1093 </span>                :            :   return GTEST_MESSAGE_(message, ::testing::TestPartResult::kFatalFailure)
-<span class="lineNum">    1094 </span>                :            : 
-<span class="lineNum">    1095 </span>                :            : #define GTEST_NONFATAL_FAILURE_(message) \
-<span class="lineNum">    1096 </span>                :            :   GTEST_MESSAGE_(message, ::testing::TestPartResult::kNonFatalFailure)
-<span class="lineNum">    1097 </span>                :            : 
-<span class="lineNum">    1098 </span>                :            : #define GTEST_SUCCESS_(message) \
-<span class="lineNum">    1099 </span>                :            :   GTEST_MESSAGE_(message, ::testing::TestPartResult::kSuccess)
+<span class="lineNum">    1028 </span>                :            :   return end;
+<span class="lineNum">    1029 </span>                :            : }
+<span class="lineNum">    1030 </span>                :            : 
+<span class="lineNum">    1031 </span>                :            : // CopyArray() copies a k-dimensional native array using the elements'
+<span class="lineNum">    1032 </span>                :            : // operator=, where k can be any integer &gt;= 0.  When k is 0,
+<span class="lineNum">    1033 </span>                :            : // CopyArray() degenerates into copying a single value.
+<span class="lineNum">    1034 </span>                :            : 
+<span class="lineNum">    1035 </span>                :            : template &lt;typename T, typename U&gt;
+<span class="lineNum">    1036 </span>                :            : void CopyArray(const T* from, size_t size, U* to);
+<span class="lineNum">    1037 </span>                :            : 
+<span class="lineNum">    1038 </span>                :            : // This generic version is used when k is 0.
+<span class="lineNum">    1039 </span>                :            : template &lt;typename T, typename U&gt;
+<span class="lineNum">    1040 </span>                :            : inline void CopyArray(const T&amp; from, U* to) { *to = from; }
+<span class="lineNum">    1041 </span>                :            : 
+<span class="lineNum">    1042 </span>                :            : // This overload is used when k &gt;= 1.
+<span class="lineNum">    1043 </span>                :            : template &lt;typename T, typename U, size_t N&gt;
+<span class="lineNum">    1044 </span>                :            : inline void CopyArray(const T(&amp;from)[N], U(*to)[N]) {
+<span class="lineNum">    1045 </span>                :            :   internal::CopyArray(from, N, *to);
+<span class="lineNum">    1046 </span>                :            : }
+<span class="lineNum">    1047 </span>                :            : 
+<span class="lineNum">    1048 </span>                :            : // This helper reduces code bloat.  If we instead put its logic inside
+<span class="lineNum">    1049 </span>                :            : // the previous CopyArray() function, arrays with different sizes
+<span class="lineNum">    1050 </span>                :            : // would lead to different copies of the template code.
+<span class="lineNum">    1051 </span>                :            : template &lt;typename T, typename U&gt;
+<span class="lineNum">    1052 </span>                :            : void CopyArray(const T* from, size_t size, U* to) {
+<span class="lineNum">    1053 </span>                :            :   for (size_t i = 0; i != size; i++) {
+<span class="lineNum">    1054 </span>                :            :     internal::CopyArray(from[i], to + i);
+<span class="lineNum">    1055 </span>                :            :   }
+<span class="lineNum">    1056 </span>                :            : }
+<span class="lineNum">    1057 </span>                :            : 
+<span class="lineNum">    1058 </span>                :            : // The relation between an NativeArray object (see below) and the
+<span class="lineNum">    1059 </span>                :            : // native array it represents.
+<span class="lineNum">    1060 </span>                :            : // We use 2 different structs to allow non-copyable types to be used, as long
+<span class="lineNum">    1061 </span>                :            : // as RelationToSourceReference() is passed.
+<span class="lineNum">    1062 </span>                :            : struct RelationToSourceReference {};
+<span class="lineNum">    1063 </span>                :            : struct RelationToSourceCopy {};
+<span class="lineNum">    1064 </span>                :            : 
+<span class="lineNum">    1065 </span>                :            : // Adapts a native array to a read-only STL-style container.  Instead
+<span class="lineNum">    1066 </span>                :            : // of the complete STL container concept, this adaptor only implements
+<span class="lineNum">    1067 </span>                :            : // members useful for Google Mock's container matchers.  New members
+<span class="lineNum">    1068 </span>                :            : // should be added as needed.  To simplify the implementation, we only
+<span class="lineNum">    1069 </span>                :            : // support Element being a raw type (i.e. having no top-level const or
+<span class="lineNum">    1070 </span>                :            : // reference modifier).  It's the client's responsibility to satisfy
+<span class="lineNum">    1071 </span>                :            : // this requirement.  Element can be an array type itself (hence
+<span class="lineNum">    1072 </span>                :            : // multi-dimensional arrays are supported).
+<span class="lineNum">    1073 </span>                :            : template &lt;typename Element&gt;
+<span class="lineNum">    1074 </span>                :            : class NativeArray {
+<span class="lineNum">    1075 </span>                :            :  public:
+<span class="lineNum">    1076 </span>                :            :   // STL-style container typedefs.
+<span class="lineNum">    1077 </span>                :            :   typedef Element value_type;
+<span class="lineNum">    1078 </span>                :            :   typedef Element* iterator;
+<span class="lineNum">    1079 </span>                :            :   typedef const Element* const_iterator;
+<span class="lineNum">    1080 </span>                :            : 
+<span class="lineNum">    1081 </span>                :            :   // Constructs from a native array. References the source.
+<span class="lineNum">    1082 </span>                :            :   NativeArray(const Element* array, size_t count, RelationToSourceReference) {
+<span class="lineNum">    1083 </span>                :            :     InitRef(array, count);
+<span class="lineNum">    1084 </span>                :            :   }
+<span class="lineNum">    1085 </span>                :            : 
+<span class="lineNum">    1086 </span>                :            :   // Constructs from a native array. Copies the source.
+<span class="lineNum">    1087 </span>                :            :   NativeArray(const Element* array, size_t count, RelationToSourceCopy) {
+<span class="lineNum">    1088 </span>                :            :     InitCopy(array, count);
+<span class="lineNum">    1089 </span>                :            :   }
+<span class="lineNum">    1090 </span>                :            : 
+<span class="lineNum">    1091 </span>                :            :   // Copy constructor.
+<span class="lineNum">    1092 </span>                :            :   NativeArray(const NativeArray&amp; rhs) {
+<span class="lineNum">    1093 </span>                :            :     (this-&gt;*rhs.clone_)(rhs.array_, rhs.size_);
+<span class="lineNum">    1094 </span>                :            :   }
+<span class="lineNum">    1095 </span>                :            : 
+<span class="lineNum">    1096 </span>                :            :   ~NativeArray() {
+<span class="lineNum">    1097 </span>                :            :     if (clone_ != &amp;NativeArray::InitRef)
+<span class="lineNum">    1098 </span>                :            :       delete[] array_;
+<span class="lineNum">    1099 </span>                :            :   }
 <span class="lineNum">    1100 </span>                :            : 
-<span class="lineNum">    1101 </span>                :            : // Suppresses MSVC warnings 4072 (unreachable code) for the code following
-<span class="lineNum">    1102 </span>                :            : // statement if it returns or throws (or doesn't return or throw in some
-<span class="lineNum">    1103 </span>                :            : // situations).
-<span class="lineNum">    1104 </span>                :            : #define GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement) \
-<span class="lineNum">    1105 </span>                :            :   if (::testing::internal::AlwaysTrue()) { statement; }
-<span class="lineNum">    1106 </span>                :            : 
-<span class="lineNum">    1107 </span>                :            : #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
-<span class="lineNum">    1108 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-<span class="lineNum">    1109 </span>                :            :   if (::testing::internal::ConstCharPtr gtest_msg = &quot;&quot;) { \
-<span class="lineNum">    1110 </span>                :            :     bool gtest_caught_expected = false; \
-<span class="lineNum">    1111 </span>                :            :     try { \
-<span class="lineNum">    1112 </span>                :            :       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-<span class="lineNum">    1113 </span>                :            :     } \
-<span class="lineNum">    1114 </span>                :            :     catch (expected_exception const&amp;) { \
-<span class="lineNum">    1115 </span>                :            :       gtest_caught_expected = true; \
-<span class="lineNum">    1116 </span>                :            :     } \
-<span class="lineNum">    1117 </span>                :            :     catch (...) { \
-<span class="lineNum">    1118 </span>                :            :       gtest_msg.value = \
-<span class="lineNum">    1119 </span>                :            :           &quot;Expected: &quot; #statement &quot; throws an exception of type &quot; \
-<span class="lineNum">    1120 </span>                :            :           #expected_exception &quot;.\n  Actual: it throws a different type.&quot;; \
-<span class="lineNum">    1121 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-<span class="lineNum">    1122 </span>                :            :     } \
-<span class="lineNum">    1123 </span>                :            :     if (!gtest_caught_expected) { \
-<span class="lineNum">    1124 </span>                :            :       gtest_msg.value = \
-<span class="lineNum">    1125 </span>                :            :           &quot;Expected: &quot; #statement &quot; throws an exception of type &quot; \
-<span class="lineNum">    1126 </span>                :            :           #expected_exception &quot;.\n  Actual: it throws nothing.&quot;; \
-<span class="lineNum">    1127 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
-<span class="lineNum">    1128 </span>                :            :     } \
-<span class="lineNum">    1129 </span>                :            :   } else \
-<span class="lineNum">    1130 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
-<span class="lineNum">    1131 </span>                :            :       fail(gtest_msg.value)
-<span class="lineNum">    1132 </span>                :            : 
-<span class="lineNum">    1133 </span>                :            : #define GTEST_TEST_NO_THROW_(statement, fail) \
-<span class="lineNum">    1134 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-<span class="lineNum">    1135 </span>                :            :   if (::testing::internal::AlwaysTrue()) { \
-<span class="lineNum">    1136 </span>                :            :     try { \
-<span class="lineNum">    1137 </span>                :            :       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-<span class="lineNum">    1138 </span>                :            :     } \
-<span class="lineNum">    1139 </span>                :            :     catch (...) { \
-<span class="lineNum">    1140 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
-<span class="lineNum">    1141 </span>                :            :     } \
-<span class="lineNum">    1142 </span>                :            :   } else \
-<span class="lineNum">    1143 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
-<span class="lineNum">    1144 </span>                :            :       fail(&quot;Expected: &quot; #statement &quot; doesn't throw an exception.\n&quot; \
-<span class="lineNum">    1145 </span>                :            :            &quot;  Actual: it throws.&quot;)
-<span class="lineNum">    1146 </span>                :            : 
-<span class="lineNum">    1147 </span>                :            : #define GTEST_TEST_ANY_THROW_(statement, fail) \
-<span class="lineNum">    1148 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-<span class="lineNum">    1149 </span>                :            :   if (::testing::internal::AlwaysTrue()) { \
-<span class="lineNum">    1150 </span>                :            :     bool gtest_caught_any = false; \
-<span class="lineNum">    1151 </span>                :            :     try { \
-<span class="lineNum">    1152 </span>                :            :       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-<span class="lineNum">    1153 </span>                :            :     } \
-<span class="lineNum">    1154 </span>                :            :     catch (...) { \
-<span class="lineNum">    1155 </span>                :            :       gtest_caught_any = true; \
-<span class="lineNum">    1156 </span>                :            :     } \
-<span class="lineNum">    1157 </span>                :            :     if (!gtest_caught_any) { \
-<span class="lineNum">    1158 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
-<span class="lineNum">    1159 </span>                :            :     } \
-<span class="lineNum">    1160 </span>                :            :   } else \
-<span class="lineNum">    1161 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
-<span class="lineNum">    1162 </span>                :            :       fail(&quot;Expected: &quot; #statement &quot; throws an exception.\n&quot; \
-<span class="lineNum">    1163 </span>                :            :            &quot;  Actual: it doesn't.&quot;)
-<span class="lineNum">    1164 </span>                :            : 
-<span class="lineNum">    1165 </span>                :            : 
-<span class="lineNum">    1166 </span>                :            : // Implements Boolean test assertions such as EXPECT_TRUE. expression can be
-<span class="lineNum">    1167 </span>                :            : // either a boolean expression or an AssertionResult. text is a textual
-<span class="lineNum">    1168 </span>                :            : // represenation of expression as it was passed into the EXPECT_TRUE.
-<span class="lineNum">    1169 </span>                :            : #define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
-<span class="lineNum">    1170 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-<span class="lineNum">    1171 </span>                :            :   if (const ::testing::AssertionResult gtest_ar_ = \
-<span class="lineNum">    1172 </span>                :            :       ::testing::AssertionResult(expression)) \
-<span class="lineNum">    1173 </span>                :            :     ; \
-<span class="lineNum">    1174 </span>                :            :   else \
-<span class="lineNum">    1175 </span>                :            :     fail(::testing::internal::GetBoolAssertionFailureMessage(\
-<span class="lineNum">    1176 </span>                :            :         gtest_ar_, text, #actual, #expected).c_str())
-<span class="lineNum">    1177 </span>                :            : 
-<span class="lineNum">    1178 </span>                :            : #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
-<span class="lineNum">    1179 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
-<span class="lineNum">    1180 </span>                :            :   if (::testing::internal::AlwaysTrue()) { \
-<span class="lineNum">    1181 </span>                :            :     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
-<span class="lineNum">    1182 </span>                :            :     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
-<span class="lineNum">    1183 </span>                :            :     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
-<span class="lineNum">    1184 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
+<span class="lineNum">    1101 </span>                :            :   // STL-style container methods.
+<span class="lineNum">    1102 </span>                :            :   size_t size() const { return size_; }
+<span class="lineNum">    1103 </span>                :            :   const_iterator begin() const { return array_; }
+<span class="lineNum">    1104 </span>                :            :   const_iterator end() const { return array_ + size_; }
+<span class="lineNum">    1105 </span>                :            :   bool operator==(const NativeArray&amp; rhs) const {
+<span class="lineNum">    1106 </span>                :            :     return size() == rhs.size() &amp;&amp;
+<span class="lineNum">    1107 </span>                :            :         ArrayEq(begin(), size(), rhs.begin());
+<span class="lineNum">    1108 </span>                :            :   }
+<span class="lineNum">    1109 </span>                :            : 
+<span class="lineNum">    1110 </span>                :            :  private:
+<span class="lineNum">    1111 </span>                :            :   enum {
+<span class="lineNum">    1112 </span>                :            :     kCheckTypeIsNotConstOrAReference = StaticAssertTypeEqHelper&lt;
+<span class="lineNum">    1113 </span>                :            :         Element, GTEST_REMOVE_REFERENCE_AND_CONST_(Element)&gt;::value
+<span class="lineNum">    1114 </span>                :            :   };
+<span class="lineNum">    1115 </span>                :            : 
+<span class="lineNum">    1116 </span>                :            :   // Initializes this object with a copy of the input.
+<span class="lineNum">    1117 </span>                :            :   void InitCopy(const Element* array, size_t a_size) {
+<span class="lineNum">    1118 </span>                :            :     Element* const copy = new Element[a_size];
+<span class="lineNum">    1119 </span>                :            :     CopyArray(array, a_size, copy);
+<span class="lineNum">    1120 </span>                :            :     array_ = copy;
+<span class="lineNum">    1121 </span>                :            :     size_ = a_size;
+<span class="lineNum">    1122 </span>                :            :     clone_ = &amp;NativeArray::InitCopy;
+<span class="lineNum">    1123 </span>                :            :   }
+<span class="lineNum">    1124 </span>                :            : 
+<span class="lineNum">    1125 </span>                :            :   // Initializes this object with a reference of the input.
+<span class="lineNum">    1126 </span>                :            :   void InitRef(const Element* array, size_t a_size) {
+<span class="lineNum">    1127 </span>                :            :     array_ = array;
+<span class="lineNum">    1128 </span>                :            :     size_ = a_size;
+<span class="lineNum">    1129 </span>                :            :     clone_ = &amp;NativeArray::InitRef;
+<span class="lineNum">    1130 </span>                :            :   }
+<span class="lineNum">    1131 </span>                :            : 
+<span class="lineNum">    1132 </span>                :            :   const Element* array_;
+<span class="lineNum">    1133 </span>                :            :   size_t size_;
+<span class="lineNum">    1134 </span>                :            :   void (NativeArray::*clone_)(const Element*, size_t);
+<span class="lineNum">    1135 </span>                :            : 
+<span class="lineNum">    1136 </span>                :            :   GTEST_DISALLOW_ASSIGN_(NativeArray);
+<span class="lineNum">    1137 </span>                :            : };
+<span class="lineNum">    1138 </span>                :            : 
+<span class="lineNum">    1139 </span>                :            : }  // namespace internal
+<span class="lineNum">    1140 </span>                :            : }  // namespace testing
+<span class="lineNum">    1141 </span>                :            : 
+<span class="lineNum">    1142 </span>                :            : #define GTEST_MESSAGE_AT_(file, line, message, result_type) \
+<span class="lineNum">    1143 </span>                :            :   ::testing::internal::AssertHelper(result_type, file, line, message) \
+<span class="lineNum">    1144 </span>                :            :     = ::testing::Message()
+<span class="lineNum">    1145 </span>                :            : 
+<span class="lineNum">    1146 </span>                :            : #define GTEST_MESSAGE_(message, result_type) \
+<span class="lineNum">    1147 </span>                :            :   GTEST_MESSAGE_AT_(__FILE__, __LINE__, message, result_type)
+<span class="lineNum">    1148 </span>                :            : 
+<span class="lineNum">    1149 </span>                :            : #define GTEST_FATAL_FAILURE_(message) \
+<span class="lineNum">    1150 </span>                :            :   return GTEST_MESSAGE_(message, ::testing::TestPartResult::kFatalFailure)
+<span class="lineNum">    1151 </span>                :            : 
+<span class="lineNum">    1152 </span>                :            : #define GTEST_NONFATAL_FAILURE_(message) \
+<span class="lineNum">    1153 </span>                :            :   GTEST_MESSAGE_(message, ::testing::TestPartResult::kNonFatalFailure)
+<span class="lineNum">    1154 </span>                :            : 
+<span class="lineNum">    1155 </span>                :            : #define GTEST_SUCCESS_(message) \
+<span class="lineNum">    1156 </span>                :            :   GTEST_MESSAGE_(message, ::testing::TestPartResult::kSuccess)
+<span class="lineNum">    1157 </span>                :            : 
+<span class="lineNum">    1158 </span>                :            : // Suppresses MSVC warnings 4072 (unreachable code) for the code following
+<span class="lineNum">    1159 </span>                :            : // statement if it returns or throws (or doesn't return or throw in some
+<span class="lineNum">    1160 </span>                :            : // situations).
+<span class="lineNum">    1161 </span>                :            : #define GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement) \
+<span class="lineNum">    1162 </span>                :            :   if (::testing::internal::AlwaysTrue()) { statement; }
+<span class="lineNum">    1163 </span>                :            : 
+<span class="lineNum">    1164 </span>                :            : #define GTEST_TEST_THROW_(statement, expected_exception, fail) \
+<span class="lineNum">    1165 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+<span class="lineNum">    1166 </span>                :            :   if (::testing::internal::ConstCharPtr gtest_msg = &quot;&quot;) { \
+<span class="lineNum">    1167 </span>                :            :     bool gtest_caught_expected = false; \
+<span class="lineNum">    1168 </span>                :            :     try { \
+<span class="lineNum">    1169 </span>                :            :       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+<span class="lineNum">    1170 </span>                :            :     } \
+<span class="lineNum">    1171 </span>                :            :     catch (expected_exception const&amp;) { \
+<span class="lineNum">    1172 </span>                :            :       gtest_caught_expected = true; \
+<span class="lineNum">    1173 </span>                :            :     } \
+<span class="lineNum">    1174 </span>                :            :     catch (...) { \
+<span class="lineNum">    1175 </span>                :            :       gtest_msg.value = \
+<span class="lineNum">    1176 </span>                :            :           &quot;Expected: &quot; #statement &quot; throws an exception of type &quot; \
+<span class="lineNum">    1177 </span>                :            :           #expected_exception &quot;.\n  Actual: it throws a different type.&quot;; \
+<span class="lineNum">    1178 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
+<span class="lineNum">    1179 </span>                :            :     } \
+<span class="lineNum">    1180 </span>                :            :     if (!gtest_caught_expected) { \
+<span class="lineNum">    1181 </span>                :            :       gtest_msg.value = \
+<span class="lineNum">    1182 </span>                :            :           &quot;Expected: &quot; #statement &quot; throws an exception of type &quot; \
+<span class="lineNum">    1183 </span>                :            :           #expected_exception &quot;.\n  Actual: it throws nothing.&quot;; \
+<span class="lineNum">    1184 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__); \
 <span class="lineNum">    1185 </span>                :            :     } \
 <span class="lineNum">    1186 </span>                :            :   } else \
-<span class="lineNum">    1187 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
-<span class="lineNum">    1188 </span>                :            :       fail(&quot;Expected: &quot; #statement &quot; doesn't generate new fatal &quot; \
-<span class="lineNum">    1189 </span>                :            :            &quot;failures in the current thread.\n&quot; \
-<span class="lineNum">    1190 </span>                :            :            &quot;  Actual: it does.&quot;)
-<span class="lineNum">    1191 </span>                :            : 
-<span class="lineNum">    1192 </span>                :            : // Expands to the name of the class that implements the given test.
-<span class="lineNum">    1193 </span>                :            : #define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
-<span class="lineNum">    1194 </span>                :            :   test_case_name##_##test_name##_Test
-<span class="lineNum">    1195 </span>                :            : 
-<span class="lineNum">    1196 </span>                :            : // Helper macro for defining tests.
-<span class="lineNum">    1197 </span>                :            : #define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)\
-<span class="lineNum">    1198 </span>                :            : class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
-<span class="lineNum">    1199 </span>                :            :  public:\
-<span class="lineNum">    1200 </span>                :            :   GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
-<span class="lineNum">    1201 </span>                :            :  private:\
-<span class="lineNum">    1202 </span>                :            :   virtual void TestBody();\
-<span class="lineNum">    1203 </span>                :            :   static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
-<span class="lineNum">    1204 </span>                :            :   GTEST_DISALLOW_COPY_AND_ASSIGN_(\
-<span class="lineNum">    1205 </span>                :            :       GTEST_TEST_CLASS_NAME_(test_case_name, test_name));\
-<span class="lineNum">    1206 </span>                :            : };\
-<span class="lineNum">    1207 </span>                :            : \
-<span class="lineNum">    1208 </span>                :            : ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name, test_name)\
-<span class="lineNum">    1209 </span>                :            :   ::test_info_ =\
-<span class="lineNum">    1210 </span>                :            :     ::testing::internal::MakeAndRegisterTestInfo(\
-<span class="lineNum">    1211 </span>                :            :         #test_case_name, #test_name, NULL, NULL, \
-<span class="lineNum">    1212 </span>                :            :         ::testing::internal::CodeLocation(__FILE__, __LINE__), \
-<span class="lineNum">    1213 </span>                :            :         (parent_id), \
-<span class="lineNum">    1214 </span>                :            :         parent_class::SetUpTestCase, \
-<span class="lineNum">    1215 </span>                :            :         parent_class::TearDownTestCase, \
-<span class="lineNum">    1216 </span>                :            :         new ::testing::internal::TestFactoryImpl&lt;\
-<span class="lineNum">    1217 </span>                :            :             GTEST_TEST_CLASS_NAME_(test_case_name, test_name)&gt;);\
-<span class="lineNum">    1218 </span>                :            : void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
-<span class="lineNum">    1219 </span>                :            : 
-<span class="lineNum">    1220 </span>                :            : #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
+<span class="lineNum">    1187 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testthrow_, __LINE__): \
+<span class="lineNum">    1188 </span>                :            :       fail(gtest_msg.value)
+<span class="lineNum">    1189 </span>                :            : 
+<span class="lineNum">    1190 </span>                :            : #define GTEST_TEST_NO_THROW_(statement, fail) \
+<span class="lineNum">    1191 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+<span class="lineNum">    1192 </span>                :            :   if (::testing::internal::AlwaysTrue()) { \
+<span class="lineNum">    1193 </span>                :            :     try { \
+<span class="lineNum">    1194 </span>                :            :       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+<span class="lineNum">    1195 </span>                :            :     } \
+<span class="lineNum">    1196 </span>                :            :     catch (...) { \
+<span class="lineNum">    1197 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+<span class="lineNum">    1198 </span>                :            :     } \
+<span class="lineNum">    1199 </span>                :            :   } else \
+<span class="lineNum">    1200 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__): \
+<span class="lineNum">    1201 </span>                :            :       fail(&quot;Expected: &quot; #statement &quot; doesn't throw an exception.\n&quot; \
+<span class="lineNum">    1202 </span>                :            :            &quot;  Actual: it throws.&quot;)
+<span class="lineNum">    1203 </span>                :            : 
+<span class="lineNum">    1204 </span>                :            : #define GTEST_TEST_ANY_THROW_(statement, fail) \
+<span class="lineNum">    1205 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+<span class="lineNum">    1206 </span>                :            :   if (::testing::internal::AlwaysTrue()) { \
+<span class="lineNum">    1207 </span>                :            :     bool gtest_caught_any = false; \
+<span class="lineNum">    1208 </span>                :            :     try { \
+<span class="lineNum">    1209 </span>                :            :       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+<span class="lineNum">    1210 </span>                :            :     } \
+<span class="lineNum">    1211 </span>                :            :     catch (...) { \
+<span class="lineNum">    1212 </span>                :            :       gtest_caught_any = true; \
+<span class="lineNum">    1213 </span>                :            :     } \
+<span class="lineNum">    1214 </span>                :            :     if (!gtest_caught_any) { \
+<span class="lineNum">    1215 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__); \
+<span class="lineNum">    1216 </span>                :            :     } \
+<span class="lineNum">    1217 </span>                :            :   } else \
+<span class="lineNum">    1218 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testanythrow_, __LINE__): \
+<span class="lineNum">    1219 </span>                :            :       fail(&quot;Expected: &quot; #statement &quot; throws an exception.\n&quot; \
+<span class="lineNum">    1220 </span>                :            :            &quot;  Actual: it doesn't.&quot;)
 <span class="lineNum">    1221 </span>                :            : 
+<span class="lineNum">    1222 </span>                :            : 
+<span class="lineNum">    1223 </span>                :            : // Implements Boolean test assertions such as EXPECT_TRUE. expression can be
+<span class="lineNum">    1224 </span>                :            : // either a boolean expression or an AssertionResult. text is a textual
+<span class="lineNum">    1225 </span>                :            : // represenation of expression as it was passed into the EXPECT_TRUE.
+<span class="lineNum">    1226 </span>                :            : #define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail) \
+<span class="lineNum">    1227 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+<span class="lineNum">    1228 </span>                :            :   if (const ::testing::AssertionResult gtest_ar_ = \
+<span class="lineNum">    1229 </span>                :            :       ::testing::AssertionResult(expression)) \
+<span class="lineNum">    1230 </span>                :            :     ; \
+<span class="lineNum">    1231 </span>                :            :   else \
+<span class="lineNum">    1232 </span>                :            :     fail(::testing::internal::GetBoolAssertionFailureMessage(\
+<span class="lineNum">    1233 </span>                :            :         gtest_ar_, text, #actual, #expected).c_str())
+<span class="lineNum">    1234 </span>                :            : 
+<span class="lineNum">    1235 </span>                :            : #define GTEST_TEST_NO_FATAL_FAILURE_(statement, fail) \
+<span class="lineNum">    1236 </span>                :            :   GTEST_AMBIGUOUS_ELSE_BLOCKER_ \
+<span class="lineNum">    1237 </span>                :            :   if (::testing::internal::AlwaysTrue()) { \
+<span class="lineNum">    1238 </span>                :            :     ::testing::internal::HasNewFatalFailureHelper gtest_fatal_failure_checker; \
+<span class="lineNum">    1239 </span>                :            :     GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
+<span class="lineNum">    1240 </span>                :            :     if (gtest_fatal_failure_checker.has_new_fatal_failure()) { \
+<span class="lineNum">    1241 </span>                :            :       goto GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__); \
+<span class="lineNum">    1242 </span>                :            :     } \
+<span class="lineNum">    1243 </span>                :            :   } else \
+<span class="lineNum">    1244 </span>                :            :     GTEST_CONCAT_TOKEN_(gtest_label_testnofatal_, __LINE__): \
+<span class="lineNum">    1245 </span>                :            :       fail(&quot;Expected: &quot; #statement &quot; doesn't generate new fatal &quot; \
+<span class="lineNum">    1246 </span>                :            :            &quot;failures in the current thread.\n&quot; \
+<span class="lineNum">    1247 </span>                :            :            &quot;  Actual: it does.&quot;)
+<span class="lineNum">    1248 </span>                :            : 
+<span class="lineNum">    1249 </span>                :            : // Expands to the name of the class that implements the given test.
+<span class="lineNum">    1250 </span>                :            : #define GTEST_TEST_CLASS_NAME_(test_case_name, test_name) \
+<span class="lineNum">    1251 </span>                :            :   test_case_name##_##test_name##_Test
+<span class="lineNum">    1252 </span>                :            : 
+<span class="lineNum">    1253 </span>                :            : // Helper macro for defining tests.
+<span class="lineNum">    1254 </span>                :            : #define GTEST_TEST_(test_case_name, test_name, parent_class, parent_id)\
+<span class="lineNum">    1255 </span>                :            : class GTEST_TEST_CLASS_NAME_(test_case_name, test_name) : public parent_class {\
+<span class="lineNum">    1256 </span>                :            :  public:\
+<span class="lineNum">    1257 </span>                :            :   GTEST_TEST_CLASS_NAME_(test_case_name, test_name)() {}\
+<span class="lineNum">    1258 </span>                :            :  private:\
+<span class="lineNum">    1259 </span>                :            :   virtual void TestBody();\
+<span class="lineNum">    1260 </span>                :            :   static ::testing::TestInfo* const test_info_ GTEST_ATTRIBUTE_UNUSED_;\
+<span class="lineNum">    1261 </span>                :            :   GTEST_DISALLOW_COPY_AND_ASSIGN_(\
+<span class="lineNum">    1262 </span>                :            :       GTEST_TEST_CLASS_NAME_(test_case_name, test_name));\
+<span class="lineNum">    1263 </span>                :            : };\
+<span class="lineNum">    1264 </span>                :            : \
+<span class="lineNum">    1265 </span>                :            : ::testing::TestInfo* const GTEST_TEST_CLASS_NAME_(test_case_name, test_name)\
+<span class="lineNum">    1266 </span>                :            :   ::test_info_ =\
+<span class="lineNum">    1267 </span>                :            :     ::testing::internal::MakeAndRegisterTestInfo(\
+<span class="lineNum">    1268 </span>                :            :         #test_case_name, #test_name, NULL, NULL, \
+<span class="lineNum">    1269 </span>                :            :         ::testing::internal::CodeLocation(__FILE__, __LINE__), \
+<span class="lineNum">    1270 </span>                :            :         (parent_id), \
+<span class="lineNum">    1271 </span>                :            :         parent_class::SetUpTestCase, \
+<span class="lineNum">    1272 </span>                :            :         parent_class::TearDownTestCase, \
+<span class="lineNum">    1273 </span>                :            :         new ::testing::internal::TestFactoryImpl&lt;\
+<span class="lineNum">    1274 </span>                :            :             GTEST_TEST_CLASS_NAME_(test_case_name, test_name)&gt;);\
+<span class="lineNum">    1275 </span>                :            : void GTEST_TEST_CLASS_NAME_(test_case_name, test_name)::TestBody()
+<span class="lineNum">    1276 </span>                :            : 
+<span class="lineNum">    1277 </span>                :            : #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 </pre>
       </td>
     </tr>
