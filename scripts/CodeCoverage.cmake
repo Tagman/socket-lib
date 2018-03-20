@@ -71,11 +71,11 @@ include(CMakeParseArguments)
 # Do gcc + clang common stuff
 
 
-
+message( STATUS "Compiler ID ${CMAKE_CXX_COMPILER_ID}")
 
 # Check which compiler is used
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    message( STATUS "Clang detected!!!cd ")
+    message( STATUS "Clang detected!!!")
     set(CLANG_USED TRUE)
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     message( STATUS "GCC detected!!!" )
