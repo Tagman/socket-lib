@@ -21,7 +21,10 @@ else
     git fetch
     git checkout gh-pages
     git pull
-    git rm -r *
+    #maybe only delete the files in the folder thats gonna be copied, so we get an complete deploy of all results
+    #try: find -type d in artifacts/results/* and delete these folders from the gh-branches, before copying them over again
+    #these are all ways for trying to avoid merge conflicts
+    #git rm -r *
     echo ${PWD}
     cp -Rf ${PWD}/../artifacts/results/* .
 
