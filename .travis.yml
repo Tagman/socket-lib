@@ -35,7 +35,6 @@ matrix:
 
 before_install:
   - pip install --user cpp-coveralls
-  - sudo apt install clang-5.0
 
 install:
   - mkdir -p build/unit
