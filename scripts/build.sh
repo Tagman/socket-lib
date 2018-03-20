@@ -6,6 +6,7 @@ SCRIPT_DIR=$(dirname $0)
 echo "Script_dir: ${SCRIPT_DIR}"
 echo "PWD: ${PWD}"
 SCAN=""
+COMPILER=""
 COVERAGE="OFF"
 
 ## Argument parsing
@@ -19,7 +20,11 @@ do
         shift #shift past argument
         ;;
         -s|--static)
-        SCAN="scan-build -o result_scan"
+        if [ "$CXX" = "clang++" ]; then
+            echo "clang detected from build script"
+            COMPILER="--use-c++=clang++ --use-cc=clang"
+        fi
+        SCAN="scan-build ${COMPILER} -o result_scan"
         shift
         ;;
         *) # unknown option
