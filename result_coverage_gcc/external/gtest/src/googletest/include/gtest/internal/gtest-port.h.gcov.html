@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2018-03-20</td>
+            <td class="headerValue">2018-03-23</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">5</td>
@@ -2746,12 +2746,13 @@
 <span class="lineNum">    2675 </span>                :            : // corresponding to the given Google Test flag.
 <span class="lineNum">    2676 </span>                :            : bool BoolFromGTestEnv(const char* flag, bool default_val);
 <span class="lineNum">    2677 </span>                :            : GTEST_API_ Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
-<span class="lineNum">    2678 </span>                :            : std::string StringFromGTestEnv(const char* flag, const char* default_val);
-<span class="lineNum">    2679 </span>                :            : 
-<span class="lineNum">    2680 </span>                :            : }  // namespace internal
-<span class="lineNum">    2681 </span>                :            : }  // namespace testing
-<span class="lineNum">    2682 </span>                :            : 
-<span class="lineNum">    2683 </span>                :            : #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
+<span class="lineNum">    2678 </span>                :            : std::string OutputFlagAlsoCheckEnvVar();
+<span class="lineNum">    2679 </span>                :            : const char* StringFromGTestEnv(const char* flag, const char* default_val);
+<span class="lineNum">    2680 </span>                :            : 
+<span class="lineNum">    2681 </span>                :            : }  // namespace internal
+<span class="lineNum">    2682 </span>                :            : }  // namespace testing
+<span class="lineNum">    2683 </span>                :            : 
+<span class="lineNum">    2684 </span>                :            : #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_H_
 </pre>
       </td>
     </tr>
