@@ -25,6 +25,7 @@ else
     #try: find -type d in artifacts/results/* and delete these folders from the gh-branches, before copying them over again
     #these are all ways for trying to avoid merge conflicts
     #git rm -r *
+    for FILE in $(ls ../artifacts/results/); do [ -d $FILE ] && rm -rf ./$FILE; done 
     echo ${PWD}
     cp -Rf ${PWD}/../artifacts/results/* .
 
