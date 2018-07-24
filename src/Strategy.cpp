@@ -3,7 +3,7 @@
 //
 
 #include "socket/Strategy.h"
-
+// new changes
 
 bool Strategy::check(int nr) {
     return nr > 0;
