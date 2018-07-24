@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="3" failures="0" disabled="0" errors="0" timestamp="2018-03-23T11:02:29" time="0" name="AllTests">
+<testsuites tests="3" failures="0" disabled="0" errors="0" timestamp="2018-07-24T14:36:40" time="0.001" name="AllTests">
   <testsuite name="TCP" tests="1" failures="0" disabled="0" errors="0" time="0">
     <testcase name="unit_sendMessage" status="run" time="0" classname="TCP" />
   </testsuite>
-  <testsuite name="CommanderTest" tests="2" failures="0" disabled="0" errors="0" time="0">
-    <testcase name="workflow" status="run" time="0" classname="CommanderTest" />
+  <testsuite name="CommanderTest" tests="2" failures="0" disabled="0" errors="0" time="0.001">
+    <testcase name="workflow" status="run" time="0.001" classname="CommanderTest" />
     <testcase name="newAndDelete" status="run" time="0" classname="CommanderTest" />
   </testsuite>
 </testsuites>

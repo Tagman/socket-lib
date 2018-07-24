@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2018-03-23</td>
+            <td class="headerValue">2018-07-24</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">10</td>
@@ -99,7 +99,7 @@
 <span class="lineNum">      28 </span>                :            : // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <span class="lineNum">      29 </span>                :            : //
 <span class="lineNum">      30 </span>                :            : //
-<span class="lineNum">      31 </span>                :            : // The Google C++ Testing Framework (Google Test)
+<span class="lineNum">      31 </span>                :            : // The Google C++ Testing and Mocking Framework (Google Test)
 <span class="lineNum">      32 </span>                :            : //
 <span class="lineNum">      33 </span>                :            : // This header file declares functions and macros used internally by
 <span class="lineNum">      34 </span>                :            : // Google Test.  They are subject to change without notice.
@@ -228,7 +228,7 @@
 <span class="lineNum">     157 </span>                :            : // Returns the optimal edits to go from 'left' to 'right'.
 <span class="lineNum">     158 </span>                :            : // All edits cost the same, with replace having lower priority than
 <span class="lineNum">     159 </span>                :            : // add/remove.
-<span class="lineNum">     160 </span>                :            : // Simple implementation of the Wagner–Fischer algorithm.
+<span class="lineNum">     160 </span>                :            : // Simple implementation of the Wagner-Fischer algorithm.
 <span class="lineNum">     161 </span>                :            : // See http://en.wikipedia.org/wiki/Wagner-Fischer_algorithm
 <span class="lineNum">     162 </span>                :            : enum EditType { kMatch, kAdd, kRemove, kReplace };
 <span class="lineNum">     163 </span>                :            : GTEST_API_ std::vector&lt;EditType&gt; CalculateOptimalEdits(
@@ -1226,7 +1226,7 @@
 <span class="lineNum">    1155 </span>                :            : #define GTEST_SUCCESS_(message) \
 <span class="lineNum">    1156 </span>                :            :   GTEST_MESSAGE_(message, ::testing::TestPartResult::kSuccess)
 <span class="lineNum">    1157 </span>                :            : 
-<span class="lineNum">    1158 </span>                :            : // Suppresses MSVC warnings 4072 (unreachable code) for the code following
+<span class="lineNum">    1158 </span>                :            : // Suppress MSVC warning 4702 (unreachable code) for the code following
 <span class="lineNum">    1159 </span>                :            : // statement if it returns or throws (or doesn't return or throw in some
 <span class="lineNum">    1160 </span>                :            : // situations).
 <span class="lineNum">    1161 </span>                :            : #define GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement) \
