@@ -37,7 +37,7 @@ do
     find "${SEARCH}" -iname 'unit_*' -executable -type f -exec cp {} "${DEPLOY}"/binaries \;
 
     find "${SEARCH}" -iname 'result_*.xml' -type f -exec cp {} "${DEPLOY}"/results \;
-    find "${SEARCH}" -iname 'result_*' ! -iname '*.dir' -type d -exec cp -r {} "${DEPLOY}"/results/ \;
+    find "${SEARCH}/.." -iname 'result_*' ! -iname '*.dir' -type d -exec cp -r {} "${DEPLOY}"/results/ \;
 
 
 fi
